@@ -557,7 +557,6 @@ app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`World Cup bracket site running at http://localhost:${PORT}`);
-  console.log(`DATA_MODE=${DATA_MODE}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
 });
