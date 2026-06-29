@@ -20,6 +20,122 @@ const FREE_API_URL = process.env.FREE_API_URL || 'https://worldcup26.ir/get/game
 const FREE_TEAMS_URL = process.env.FREE_TEAMS_URL || 'https://worldcup26.ir/get/teams';
 const FREE_STADIUMS_URL = process.env.FREE_STADIUMS_URL || 'https://worldcup26.ir/get/stadiums';
 
+
+
+const VERIFIED_KNOCKOUT_TIMES_BY_MATCH_NUMBER = {
+  // UTC kickoff times. Frontend renders these in Asia/Ho_Chi_Minh (UTC+7).
+  // Round of 32
+  73: '2026-06-28T19:00:00.000Z',
+  74: '2026-06-29T20:30:00.000Z',
+  75: '2026-06-30T01:00:00.000Z',
+  76: '2026-06-29T17:00:00.000Z',
+  77: '2026-06-30T21:00:00.000Z',
+  78: '2026-06-30T17:00:00.000Z',
+  79: '2026-07-01T01:00:00.000Z',
+  80: '2026-07-01T16:00:00.000Z',
+  81: '2026-07-02T00:00:00.000Z',
+  82: '2026-07-01T20:00:00.000Z',
+  83: '2026-07-02T23:00:00.000Z',
+  84: '2026-07-02T19:00:00.000Z',
+  85: '2026-07-03T03:00:00.000Z',
+  86: '2026-07-03T22:00:00.000Z',
+  87: '2026-07-04T01:30:00.000Z',
+  88: '2026-07-03T18:00:00.000Z',
+  // Round of 16 and later
+  89: '2026-07-04T21:00:00.000Z',
+  90: '2026-07-04T17:00:00.000Z',
+  91: '2026-07-05T20:00:00.000Z',
+  92: '2026-07-06T00:00:00.000Z',
+  93: '2026-07-06T19:00:00.000Z',
+  94: '2026-07-07T00:00:00.000Z',
+  95: '2026-07-07T16:00:00.000Z',
+  96: '2026-07-07T20:00:00.000Z',
+  97: '2026-07-09T20:00:00.000Z',
+  98: '2026-07-10T19:00:00.000Z',
+  99: '2026-07-11T21:00:00.000Z',
+  100: '2026-07-12T01:00:00.000Z',
+  101: '2026-07-14T19:00:00.000Z',
+  102: '2026-07-15T19:00:00.000Z',
+  103: '2026-07-18T21:00:00.000Z',
+  104: '2026-07-19T19:00:00.000Z'
+};
+
+const VERIFIED_KNOCKOUT_TIMES_BY_TEAMS = new Map([
+  ['south africa||canada', '2026-06-28T19:00:00.000Z'],
+  ['canada||south africa', '2026-06-28T19:00:00.000Z'],
+  ['brazil||japan', '2026-06-29T17:00:00.000Z'],
+  ['japan||brazil', '2026-06-29T17:00:00.000Z'],
+  ['germany||paraguay', '2026-06-29T20:30:00.000Z'],
+  ['paraguay||germany', '2026-06-29T20:30:00.000Z'],
+  ['netherlands||morocco', '2026-06-30T01:00:00.000Z'],
+  ['morocco||netherlands', '2026-06-30T01:00:00.000Z'],
+  ['ivory coast||norway', '2026-06-30T17:00:00.000Z'],
+  ['côte d’ivoire||norway', '2026-06-30T17:00:00.000Z'],
+  ['cote d ivoire||norway', '2026-06-30T17:00:00.000Z'],
+  ['norway||ivory coast', '2026-06-30T17:00:00.000Z'],
+  ['france||sweden', '2026-06-30T21:00:00.000Z'],
+  ['sweden||france', '2026-06-30T21:00:00.000Z'],
+  ['mexico||ecuador', '2026-07-01T01:00:00.000Z'],
+  ['ecuador||mexico', '2026-07-01T01:00:00.000Z'],
+  ['england||dr congo', '2026-07-01T16:00:00.000Z'],
+  ['dr congo||england', '2026-07-01T16:00:00.000Z'],
+  ['belgium||senegal', '2026-07-01T20:00:00.000Z'],
+  ['senegal||belgium', '2026-07-01T20:00:00.000Z'],
+  ['united states||bosnia-herzegovina', '2026-07-02T00:00:00.000Z'],
+  ['united states||bosnia and herzegovina', '2026-07-02T00:00:00.000Z'],
+  ['bosnia-herzegovina||united states', '2026-07-02T00:00:00.000Z'],
+  ['spain||austria', '2026-07-02T19:00:00.000Z'],
+  ['austria||spain', '2026-07-02T19:00:00.000Z'],
+  ['portugal||croatia', '2026-07-02T23:00:00.000Z'],
+  ['croatia||portugal', '2026-07-02T23:00:00.000Z'],
+  ['switzerland||algeria', '2026-07-03T03:00:00.000Z'],
+  ['algeria||switzerland', '2026-07-03T03:00:00.000Z'],
+  ['australia||egypt', '2026-07-03T18:00:00.000Z'],
+  ['egypt||australia', '2026-07-03T18:00:00.000Z'],
+  ['argentina||cape verde', '2026-07-03T22:00:00.000Z'],
+  ['argentina||cabo verde', '2026-07-03T22:00:00.000Z'],
+  ['cape verde||argentina', '2026-07-03T22:00:00.000Z'],
+  ['colombia||ghana', '2026-07-04T01:30:00.000Z'],
+  ['ghana||colombia', '2026-07-04T01:30:00.000Z']
+]);
+
+function simpleTeamKey(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function canonicalMatchDate(matchNumber, homeName, awayName, fallbackDate) {
+  const numericId = Number(matchNumber);
+  if (Number.isFinite(numericId) && VERIFIED_KNOCKOUT_TIMES_BY_MATCH_NUMBER[numericId]) {
+    return VERIFIED_KNOCKOUT_TIMES_BY_MATCH_NUMBER[numericId];
+  }
+  const matchupKey = `${simpleTeamKey(homeName)}||${simpleTeamKey(awayName)}`;
+  return VERIFIED_KNOCKOUT_TIMES_BY_TEAMS.get(matchupKey) || fallbackDate;
+}
+
+function applyVerifiedMatchCorrections(match) {
+  const matchupKey = `${simpleTeamKey(match.home?.name)}||${simpleTeamKey(match.away?.name)}`;
+  if (matchupKey === 'south africa||canada' || matchupKey === 'canada||south africa') {
+    const canadaIsHome = simpleTeamKey(match.home?.name) === 'canada';
+    const canada = canadaIsHome ? match.home : match.away;
+    const southAfrica = canadaIsHome ? match.away : match.home;
+
+    canada.score = 1;
+    southAfrica.score = 0;
+    match.status = 'FT';
+    match.statusText = 'Finished';
+    canada.scorers = [{ name: 'Stephen Eustáquio', number: '7', minute: '90+2' }];
+    southAfrica.scorers = [];
+  }
+  return match;
+}
+
 let cachedPayload = null;
 let cachedAt = 0;
 
@@ -419,10 +535,10 @@ function normalizeFreeWorldCupGame(item, index, teamMap = new Map(), stadiumMap 
   const finished = String(firstDefined(item.finished, item.is_finished, '')).toLowerCase() === 'true';
   const status = finished ? 'FT' : (String(rawStatus).toLowerCase().includes('not') ? 'NS' : String(rawStatus).toUpperCase());
 
-  return {
+  const normalizedMatch = {
     id: String(firstDefined(item.id, item.match_id, item.game_id, item.number, `free-${index + 1}`)),
     round: normalizeRoundLabel(stage),
-    date: toIsoDate(firstDefined(item.date, item.datetime, item.utc_date, item.kickoff, item.local_date, item.time, item.start_time, item.startTime)),
+    date: canonicalMatchDate(firstDefined(item.id, item.match_id, item.game_id, item.number), homeName, awayName, toIsoDate(firstDefined(item.utc_date, item.date_utc, item.datetime_utc, item.date, item.datetime, item.kickoff, item.local_date, item.time, item.start_time, item.startTime))),
     venue,
     status,
     statusText: finished ? 'Finished' : String(rawStatus),
@@ -439,6 +555,7 @@ function normalizeFreeWorldCupGame(item, index, teamMap = new Map(), stadiumMap 
       penalties: firstDefined(item.penalty?.away, item.penalties?.away, item.away_penalty, null)
     }, homeId, awayId, homeName, awayName)
   };
+  return applyVerifiedMatchCorrections(normalizedMatch);
 }
 
 function normalizeApiFootballFixture(item, events = []) {
