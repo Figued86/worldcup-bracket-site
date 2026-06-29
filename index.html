@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>World Cup 2026 Knockout Bracket</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page-shell">
+    <header class="hero">
+      <div class="badge">⚡</div>
+      <h1>WORLD CUP 2026</h1>
+      <p>KNOCKOUT STAGE</p>
+      <div class="meta">
+        <span id="dataSource">Loading...</span>
+        <span id="lastUpdated">--</span>
+      </div>
+    </header>
+
+    <section class="bracket" aria-label="World Cup knockout bracket">
+      <div class="side side-left" id="leftSide"></div>
+
+      <div class="center-stage">
+        <div class="year-mark">26</div>
+        <div class="trophy" aria-label="World Cup trophy">🏆</div>
+        <div class="final-card" id="finalCard"></div>
+      </div>
+
+      <div class="side side-right" id="rightSide"></div>
+    </section>
+  </main>
+
+  <template id="matchTemplate">
+    <article class="match-card">
+      <div class="match-topline">
+        <span class="round-name"></span>
+        <span class="status-pill"></span>
+      </div>
+      <div class="team home-team">
+        <img class="flag" alt="" />
+        <span class="team-name"></span>
+        <strong class="score"></strong>
+        <span class="team-details"></span>
+      </div>
+      <div class="team away-team">
+        <img class="flag" alt="" />
+        <span class="team-name"></span>
+        <strong class="score"></strong>
+        <span class="team-details"></span>
+      </div>
+      <div class="match-footer"></div>
+    </article>
+  </template>
+
+  <div class="match-modal" id="matchModal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-label="Match details">
+      <button class="modal-close" id="modalClose" type="button" aria-label="Close match details">×</button>
+      <div id="modalCard"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

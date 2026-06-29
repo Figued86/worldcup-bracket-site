@@ -1,0 +1,953 @@
+{
+  "source": "mock",
+  "updatedAt": "2026-06-29T02:17:39.830744Z",
+  "matches": [
+    {
+      "id": "r32-1",
+      "round": "Round of 32",
+      "date": "2026-06-28T22:00:00Z",
+      "venue": "TBC",
+      "status": "FT",
+      "statusText": "Finished",
+      "home": {
+        "name": "Germany",
+        "flag": "https://flagcdn.com/w80/de.png",
+        "score": 2,
+        "penalties": null,
+        "scorers": [
+          {
+            "name": "Michael Owen",
+            "number": "10",
+            "minute": "23"
+          },
+          {
+            "name": "Demo Striker",
+            "number": "9",
+            "minute": "67"
+          }
+        ],
+        "cards": {
+          "yellow": 2,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Paraguay",
+        "flag": "https://flagcdn.com/w80/py.png",
+        "score": 1,
+        "penalties": null,
+        "scorers": [
+          {
+            "name": "Demo Midfielder",
+            "number": "8",
+            "minute": "51"
+          }
+        ],
+        "cards": {
+          "yellow": 3,
+          "red": 1
+        }
+      }
+    },
+    {
+      "id": "r32-2",
+      "round": "Round of 32",
+      "date": "2026-06-29T01:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "France",
+        "flag": "https://flagcdn.com/w80/fr.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Sweden",
+        "flag": "https://flagcdn.com/w80/se.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-3",
+      "round": "Round of 32",
+      "date": "2026-06-29T22:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "South Africa",
+        "flag": "https://flagcdn.com/w80/za.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Canada",
+        "flag": "https://flagcdn.com/w80/ca.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-4",
+      "round": "Round of 32",
+      "date": "2026-06-30T01:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Netherlands",
+        "flag": "https://flagcdn.com/w80/nl.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Morocco",
+        "flag": "https://flagcdn.com/w80/ma.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-5",
+      "round": "Round of 32",
+      "date": "2026-06-30T22:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Portugal",
+        "flag": "https://flagcdn.com/w80/pt.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Croatia",
+        "flag": "https://flagcdn.com/w80/hr.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-6",
+      "round": "Round of 32",
+      "date": "2026-07-01T01:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Spain",
+        "flag": "https://flagcdn.com/w80/es.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Austria",
+        "flag": "https://flagcdn.com/w80/at.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-7",
+      "round": "Round of 32",
+      "date": "2026-07-01T22:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "United States",
+        "flag": "https://flagcdn.com/w80/us.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Bosnia-Herzegovina",
+        "flag": "https://flagcdn.com/w80/ba.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-8",
+      "round": "Round of 32",
+      "date": "2026-07-02T01:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Belgium",
+        "flag": "https://flagcdn.com/w80/be.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Senegal",
+        "flag": "https://flagcdn.com/w80/sn.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-9",
+      "round": "Round of 32",
+      "date": "2026-07-02T22:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Brazil",
+        "flag": "https://flagcdn.com/w80/br.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Japan",
+        "flag": "https://flagcdn.com/w80/jp.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-10",
+      "round": "Round of 32",
+      "date": "2026-07-03T01:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Ivory Coast",
+        "flag": "https://flagcdn.com/w80/ci.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Norway",
+        "flag": "https://flagcdn.com/w80/no.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-11",
+      "round": "Round of 32",
+      "date": "2026-07-03T22:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Mexico",
+        "flag": "https://flagcdn.com/w80/mx.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Ecuador",
+        "flag": "https://flagcdn.com/w80/ec.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-12",
+      "round": "Round of 32",
+      "date": "2026-07-04T01:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "England",
+        "flag": "https://flagcdn.com/w80/gb-eng.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "DR Congo",
+        "flag": "https://flagcdn.com/w80/cd.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-13",
+      "round": "Round of 32",
+      "date": "2026-07-04T22:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Argentina",
+        "flag": "https://flagcdn.com/w80/ar.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Cape Verde",
+        "flag": "https://flagcdn.com/w80/cv.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-14",
+      "round": "Round of 32",
+      "date": "2026-07-05T01:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Australia",
+        "flag": "https://flagcdn.com/w80/au.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Egypt",
+        "flag": "https://flagcdn.com/w80/eg.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-15",
+      "round": "Round of 32",
+      "date": "2026-07-05T22:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Switzerland",
+        "flag": "https://flagcdn.com/w80/ch.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Algeria",
+        "flag": "https://flagcdn.com/w80/dz.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "r32-16",
+      "round": "Round of 32",
+      "date": "2026-07-06T01:00:00Z",
+      "venue": "TBC",
+      "status": "NS",
+      "statusText": "Not Started",
+      "home": {
+        "name": "Colombia",
+        "flag": "https://flagcdn.com/w80/co.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Ghana",
+        "flag": "https://flagcdn.com/w80/gh.png",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "round-of-16-1",
+      "round": "Round of 16",
+      "date": "2026-07-06T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "round-of-16-2",
+      "round": "Round of 16",
+      "date": "2026-07-07T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "round-of-16-3",
+      "round": "Round of 16",
+      "date": "2026-07-08T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "round-of-16-4",
+      "round": "Round of 16",
+      "date": "2026-07-09T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "round-of-16-5",
+      "round": "Round of 16",
+      "date": "2026-07-10T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "round-of-16-6",
+      "round": "Round of 16",
+      "date": "2026-07-11T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "round-of-16-7",
+      "round": "Round of 16",
+      "date": "2026-07-12T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "round-of-16-8",
+      "round": "Round of 16",
+      "date": "2026-07-13T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "quarter-finals-1",
+      "round": "Quarter-finals",
+      "date": "2026-07-16T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "quarter-finals-2",
+      "round": "Quarter-finals",
+      "date": "2026-07-17T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "quarter-finals-3",
+      "round": "Quarter-finals",
+      "date": "2026-07-18T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "quarter-finals-4",
+      "round": "Quarter-finals",
+      "date": "2026-07-19T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "semi-finals-1",
+      "round": "Semi-finals",
+      "date": "2026-07-22T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "semi-finals-2",
+      "round": "Semi-finals",
+      "date": "2026-07-23T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    },
+    {
+      "id": "final-1",
+      "round": "Final",
+      "date": "2026-07-26T22:00:00Z",
+      "venue": "TBC",
+      "status": "TBC",
+      "statusText": "To Be Confirmed",
+      "home": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      },
+      "away": {
+        "name": "Winner TBD",
+        "flag": "",
+        "score": null,
+        "penalties": null,
+        "scorers": [],
+        "cards": {
+          "yellow": 0,
+          "red": 0
+        }
+      }
+    }
+  ]
+}
