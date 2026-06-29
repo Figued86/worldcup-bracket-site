@@ -50,3 +50,16 @@ npm start
 ## Lưu ý
 
 Free API không phải nguồn chính thức của FIFA, nên dữ liệu số áo cầu thủ, goal events và card events phụ thuộc vào API có trả về hay không. Website đã có fallback: nếu thiếu dữ liệu sẽ hiển thị `No scorer data` hoặc `No. TBC`.
+
+
+## Vietnam time display
+
+The frontend always displays match times in Vietnam time: `Asia/Ho_Chi_Minh` / `UTC+7`.
+
+If the free API returns a date without timezone information, the backend assumes the source date is North American Eastern time by default:
+
+```env
+SOURCE_TIMEZONE=America/New_York
+```
+
+The backend converts that source time to ISO UTC, and the frontend formats it back to Vietnam time. Example: `2026-06-29 13:00 EDT` becomes `00:00 30/06/2026 UTC+7`.

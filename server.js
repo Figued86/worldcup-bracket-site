@@ -292,14 +292,74 @@ function makeTeamPayload(item, side, base, homeId, awayId, homeName, awayName) {
   };
 }
 
+function normalizeTimezoneAbbreviation(value) {
+  return String(value)
+    .replace(/\bEDT\b/i, '-04:00')
+    .replace(/\bEST\b/i, '-05:00')
+    .replace(/\bCDT\b/i, '-05:00')
+    .replace(/\bCST\b/i, '-06:00')
+    .replace(/\bMDT\b/i, '-06:00')
+    .replace(/\bMST\b/i, '-07:00')
+    .replace(/\bPDT\b/i, '-07:00')
+    .replace(/\bPST\b/i, '-08:00');
+}
+
+function easternOffsetHours(year, month, day) {
+  // World Cup 2026 is in June/July, when US Eastern time is EDT = UTC-4.
+  // This fallback also keeps a basic DST range for other dates.
+  if (month > 3 && month < 11) return -4;
+  if (month < 3 || month > 11) return -5;
+  return -4;
+}
+
+function makeIsoFromSourceLocal(year, month, day, hour, minute) {
+  const sourceTimezone = String(process.env.SOURCE_TIMEZONE || 'America/New_York');
+  let offsetHours = -4;
+  if (sourceTimezone === 'Asia/Ho_Chi_Minh' || sourceTimezone === 'Asia/Jakarta') offsetHours = 7;
+  else if (sourceTimezone === 'UTC') offsetHours = 0;
+  else offsetHours = easternOffsetHours(year, month, day);
+  const utcMs = Date.UTC(year, month - 1, day, hour - offsetHours, minute, 0);
+  return new Date(utcMs).toISOString();
+}
+
+function parseHourMinute(timePart, ampm) {
+  const [hourRaw, minuteRaw = '0'] = String(timePart).split(':');
+  let hour = Number(hourRaw);
+  const minute = Number(minuteRaw);
+  if (ampm) {
+    const marker = ampm.toUpperCase();
+    if (marker === 'PM' && hour < 12) hour += 12;
+    if (marker === 'AM' && hour === 12) hour = 0;
+  }
+  return { hour, minute };
+}
+
 function toIsoDate(raw) {
   if (!raw) return null;
   const s = String(raw).trim();
-  if (/^\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}/.test(s)) {
-    const [datePart, timePart] = s.split(/\s+/);
-    const [month, day, year] = datePart.split('/');
-    return `${year}-${month}-${day}T${timePart}:00`;
+
+  const withTz = normalizeTimezoneAbbreviation(s);
+  const parsedWithTz = new Date(withTz);
+  if (!Number.isNaN(parsedWithTz.getTime()) && /([zZ]|[+-]\d{2}:?\d{2})$/.test(withTz)) {
+    return parsedWithTz.toISOString();
   }
+
+  let match = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}:\d{2})(?::\d{2})?\s*(AM|PM)?$/i);
+  if (match) {
+    const [, year, month, day, timePart, ampm] = match;
+    const { hour, minute } = parseHourMinute(timePart, ampm);
+    return makeIsoFromSourceLocal(Number(year), Number(month), Number(day), hour, minute);
+  }
+
+  match = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}:\d{2})(?::\d{2})?\s*(AM|PM)?$/i);
+  if (match) {
+    const [, month, day, year, timePart, ampm] = match;
+    const { hour, minute } = parseHourMinute(timePart, ampm);
+    return makeIsoFromSourceLocal(Number(year), Number(month), Number(day), hour, minute);
+  }
+
+  const parsed = new Date(withTz);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
   return s;
 }
 
@@ -557,6 +617,7 @@ app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`World Cup bracket site running at http://localhost:${PORT}`);
+  console.log(`DATA_MODE=${DATA_MODE}`);
 });

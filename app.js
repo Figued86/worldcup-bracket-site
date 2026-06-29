@@ -20,13 +20,35 @@ function normalizeRound(round = '') {
 }
 
 const DISPLAY_TIMEZONE = 'Asia/Ho_Chi_Minh';
+const DISPLAY_TIMEZONE_LABEL = 'UTC+7';
+
+function normalizeTimezoneAbbreviation(value) {
+  return String(value)
+    .replace(/\bEDT\b/i, '-04:00')
+    .replace(/\bEST\b/i, '-05:00')
+    .replace(/\bCDT\b/i, '-05:00')
+    .replace(/\bCST\b/i, '-06:00')
+    .replace(/\bMDT\b/i, '-06:00')
+    .replace(/\bMST\b/i, '-07:00')
+    .replace(/\bPDT\b/i, '-07:00')
+    .replace(/\bPST\b/i, '-08:00');
+}
+
+function parseMatchDate(dateString) {
+  if (!dateString) return null;
+  if (dateString instanceof Date) return dateString;
+  const raw = String(dateString).trim();
+  const normalized = normalizeTimezoneAbbreviation(raw);
+  const parsed = new Date(normalized);
+  if (!Number.isNaN(parsed.getTime())) return parsed;
+  return null;
+}
 
 function formatDate(dateString) {
-  if (!dateString) return 'Date TBC';
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return String(dateString);
+  const date = parseMatchDate(dateString);
+  if (!date) return dateString ? String(dateString) : 'Date TBC';
 
-  return new Intl.DateTimeFormat('vi-VN', {
+  const parts = new Intl.DateTimeFormat('vi-VN', {
     timeZone: DISPLAY_TIMEZONE,
     hour: '2-digit',
     minute: '2-digit',
@@ -34,7 +56,12 @@ function formatDate(dateString) {
     month: '2-digit',
     year: 'numeric',
     hour12: false
-  }).format(date) + ' VN';
+  }).formatToParts(date).reduce((acc, part) => {
+    acc[part.type] = part.value;
+    return acc;
+  }, {});
+
+  return `${parts.hour}:${parts.minute} ${parts.day}/${parts.month}/${parts.year} ${DISPLAY_TIMEZONE_LABEL}`;
 }
 
 function scoreText(team) {
