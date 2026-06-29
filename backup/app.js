@@ -19,22 +19,11 @@ function normalizeRound(round = '') {
   return round || 'Knockout';
 }
 
-const DISPLAY_TIMEZONE = 'Asia/Ho_Chi_Minh';
-
 function formatDate(dateString) {
   if (!dateString) return 'Date TBC';
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return String(dateString);
-
   return new Intl.DateTimeFormat('vi-VN', {
-    timeZone: DISPLAY_TIMEZONE,
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour12: false
-  }).format(date) + ' VN';
+    month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  }).format(new Date(dateString));
 }
 
 function scoreText(team) {
