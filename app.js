@@ -360,10 +360,8 @@ function matchDetailsHtml(match) {
 
   return `
     <div class="modal-title">
-      <div>
-        <span>${safe(normalizeRound(match.round))}</span>
-        <h2>${safe(match.home?.name || 'TBD')} vs ${safe(match.away?.name || 'TBD')}</h2>
-      </div>
+      <span>${safe(normalizeRound(match.round))}</span>
+      <h2>${safe(match.home?.name || 'TBD')} vs ${safe(match.away?.name || 'TBD')}</h2>
       <strong>${safe(match.status || 'TBC')}</strong>
     </div>
     <div class="modal-scoreline">${safe(scoreText(match.home))} : ${safe(scoreText(match.away))}</div>
