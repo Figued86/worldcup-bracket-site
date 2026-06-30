@@ -118,17 +118,63 @@ function cleanDisplayValue(value, fallback = '') {
   return String(parsed || fallback).trim();
 }
 
+const FIFA_TEAM_CODES = {
+  'ARGENTINA': 'ARG',
+  'AUSTRALIA': 'AUS',
+  'AUSTRIA': 'AUT',
+  'BELGIUM': 'BEL',
+  'BOSNIAHERZEGOVINA': 'BIH',
+  'BOSNIA AND HERZEGOVINA': 'BIH',
+  'BRAZIL': 'BRA',
+  'CANADA': 'CAN',
+  'CAPEVERDE': 'CPV',
+  'CROATIA': 'CRO',
+  'DRCONGO': 'COD',
+  'ECUADOR': 'ECU',
+  'EGYPT': 'EGY',
+  'ENGLAND': 'ENG',
+  'FRANCE': 'FRA',
+  'GERMANY': 'GER',
+  'GHANA': 'GHA',
+  'IVORYCOAST': 'CIV',
+  "COTE D'IVOIRE": 'CIV',
+  'JAPAN': 'JPN',
+  'MEXICO': 'MEX',
+  'MOROCCO': 'MAR',
+  'NETHERLANDS': 'NED',
+  'NORWAY': 'NOR',
+  'PARAGUAY': 'PAR',
+  'PORTUGAL': 'POR',
+  'SENEGAL': 'SEN',
+  'SOUTHAFRICA': 'RSA',
+  'SPAIN': 'ESP',
+  'SWEDEN': 'SWE',
+  'SWITZERLAND': 'SUI',
+  'UNITEDSTATES': 'USA',
+  'UNITED STATES': 'USA',
+  'ALGERIA': 'ALG'
+};
+
 function abbreviateTeamName(name) {
   const raw = String(name || 'TBD').trim();
   if (!raw || raw.toUpperCase() === 'TBD') return 'TBD';
 
-  const lettersOnly = raw
+  const normalized = raw
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9]/g, '')
+    .replace(/[^a-zA-Z0-9 ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
     .toUpperCase();
 
-  return (lettersOnly || raw.toUpperCase()).slice(0, 5);
+  const compact = normalized.replace(/\s+/g, '').trim();
+  return FIFA_TEAM_CODES[normalized] || FIFA_TEAM_CODES[compact] || compact.slice(0, 3) || 'TBD';
+}
+
+function mainCardTeamName(name, played) {
+  const raw = String(name || 'TBD').trim();
+  if (!raw) return 'TBD';
+  return played ? abbreviateTeamName(raw) : raw.toUpperCase();
 }
 
 function placeholderFlag(teamName) {
@@ -230,6 +276,11 @@ function isMatchPlayed(match) {
   if (getWinnerSide(match)) return true;
   if (numericScore(match?.home?.score) !== null || numericScore(match?.away?.score) !== null) return true;
   return ['FT', 'AET', 'PEN', 'LIVE', 'HT', 'ET', '1H', '2H', 'ABD', 'AWD', 'WO'].includes(status);
+}
+
+function isLiveStatus(status) {
+  const normalized = String(status || '').toUpperCase();
+  return ['LIVE', 'HT', 'ET', '1H', '2H', 'IN PLAY'].includes(normalized);
 }
 
 function datePartsInVietnam(date) {
@@ -494,7 +545,14 @@ function renderMatch(match) {
   const played = isMatchPlayed(match);
 
   node.querySelector('.round-name').textContent = round;
-  node.querySelector('.status-pill').textContent = match.status || 'TBC';
+  const statusValue = match.status || 'TBC';
+  const statusPill = node.querySelector('.status-pill');
+  statusPill.textContent = statusValue;
+
+  if (isLiveStatus(statusValue)) {
+    node.classList.add('is-live');
+    statusPill.classList.add('is-live');
+  }
 
   if (winnerSide) node.classList.add('has-winner');
   node.classList.add(played ? 'is-played' : 'is-upcoming');
@@ -514,7 +572,7 @@ function renderMatch(match) {
     img.src = team.flag || placeholderFlag(team.name);
     img.alt = `${team.name || 'TBD'} flag`;
     const teamNameEl = row.querySelector('.team-name');
-    teamNameEl.textContent = abbreviateTeamName(team.name);
+    teamNameEl.textContent = mainCardTeamName(team.name, played);
     teamNameEl.title = team.name || 'TBD';
     row.querySelector('.score').textContent = scoreText(team);
     const detailsEl = row.querySelector('.team-details');
