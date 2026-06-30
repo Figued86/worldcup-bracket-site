@@ -63,3 +63,25 @@ SOURCE_TIMEZONE=America/New_York
 ```
 
 The backend converts that source time to ISO UTC, and the frontend formats it back to Vietnam time. Example: `2026-06-29 13:00 EDT` becomes `00:00 30/06/2026 UTC+7`.
+
+## Bản cập nhật mới nhất
+
+- Hiển thị thêm **kết quả penalty ngay trên match card** khi trận đấu có penalty shoot-out.
+- Pop-up chi tiết vẫn hiển thị riêng phần **Penalty shoot-out**.
+- Tối ưu thêm giao diện cho **iPhone 14 Pro Max**:
+  - hỗ trợ `viewport-fit=cover`
+  - tối ưu khoảng đệm theo safe area của iPhone
+  - tăng kích thước vùng bấm
+  - tăng độ rõ của font và score trên màn hình nhỏ
+  - modal hiển thị gọn và dễ thao tác hơn trên mobile
+
+
+## Mobile one-column + refresh indicator
+
+Latest update includes:
+
+- Mobile one-column layout for iPhone-style screens.
+- Sticky round navigation on mobile.
+- Popup open/close animation.
+- Loading / auto refresh indicator in the header.
+- Penalty shoot-out result shown both on match cards and in the detailed popup.

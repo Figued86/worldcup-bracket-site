@@ -12,7 +12,7 @@
   --gold: #e0ba52;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body { min-height: 100%; }
 
@@ -65,6 +65,43 @@ body::before {
   color: var(--muted);
 }
 
+.refresh-status {
+  position: relative;
+  overflow: hidden;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(111, 233, 255, 0.24);
+  background: rgba(111, 233, 255, 0.08);
+  color: rgba(255,255,255,0.86);
+  font-weight: 800;
+}
+
+.refresh-status::after {
+  content: '';
+  position: absolute;
+  left: -45%;
+  top: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: translateX(-100%);
+}
+
+.refresh-status.is-loading::after {
+  animation: refreshSweep 1s linear infinite;
+}
+
+.refresh-status.is-ok { border-color: rgba(111, 233, 255, 0.44); }
+.refresh-status.is-error { border-color: rgba(255, 99, 99, 0.56); color: #ffd0d0; }
+
+@keyframes refreshSweep {
+  to { transform: translateX(330%); }
+}
+
+.mobile-round-nav {
+  display: none;
+}
+
 .bracket {
   position: relative;
   z-index: 2;
@@ -91,6 +128,18 @@ body::before {
   display: grid;
   gap: 12px;
   position: relative;
+}
+
+.round-column::before {
+  content: attr(data-round);
+  display: none;
+  margin: 10px 2px 2px;
+  color: rgba(255,255,255,0.92);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .round-column[data-round="Round of 32"] { gap: 9px; }
@@ -200,6 +249,23 @@ body::before {
   color: #ffffff;
 }
 
+.penalty-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(224, 186, 82, 0.35);
+  background: rgba(224, 186, 82, 0.10);
+  color: #ffe7a3;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .match-footer {
   margin-top: 8px;
   display: block;
@@ -300,6 +366,26 @@ body::before {
 
 .match-modal.is-open {
   display: flex;
+}
+
+.match-modal {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.match-modal.is-visible {
+  opacity: 1;
+}
+
+.match-modal .modal-panel {
+  transform: translateY(18px) scale(0.98);
+  opacity: 0;
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1), opacity 180ms ease;
+}
+
+.match-modal.is-visible .modal-panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
 }
 
 .modal-panel {
@@ -530,5 +616,220 @@ body::before {
 
   .center-logo-cluster {
     width: min(250px, 92%);
+  }
+}
+
+
+@media (max-width: 760px) {
+  .mobile-round-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 0 10px;
+    margin: -4px 0 10px;
+    background: linear-gradient(180deg, rgba(6, 9, 39, 0.94), rgba(6, 9, 39, 0.72));
+    backdrop-filter: blur(10px);
+    scrollbar-width: none;
+  }
+
+  .mobile-round-nav::-webkit-scrollbar { display: none; }
+
+  .mobile-round-nav button {
+    flex: 0 0 auto;
+    min-height: 40px;
+    border: 1px solid rgba(111, 233, 255, 0.34);
+    border-radius: 999px;
+    padding: 0 13px;
+    color: rgba(255,255,255,0.92);
+    background: rgba(111, 233, 255, 0.10);
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .round-column::before { display: block; }
+}
+
+@media (max-width: 430px) {
+  body {
+    background:
+      linear-gradient(rgba(8, 12, 56, 0.86), rgba(6, 9, 39, 0.94)),
+      radial-gradient(circle at 50% 22%, rgba(111, 233, 255, 0.11), transparent 16rem),
+      url('assets/bg-worldcup-ref.jpg') center top/cover no-repeat,
+      var(--bg);
+  }
+
+  .page-shell {
+    padding:
+      calc(12px + env(safe-area-inset-top, 0px))
+      calc(12px + env(safe-area-inset-right, 0px))
+      calc(22px + env(safe-area-inset-bottom, 0px))
+      calc(12px + env(safe-area-inset-left, 0px));
+  }
+
+  .hero {
+    margin-bottom: 12px;
+  }
+
+  .meta {
+    gap: 8px;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .bracket {
+    gap: 12px;
+    padding-bottom: 0;
+  }
+
+  .side {
+    gap: 10px;
+  }
+
+  .round-column {
+    gap: 10px !important;
+  }
+
+  .match-card {
+    min-height: 214px;
+    padding: 12px 12px 13px;
+    border-radius: 20px;
+  }
+
+  .match-topline,
+  .match-footer {
+    font-size: 11px;
+  }
+
+  .round-name {
+    max-width: 62%;
+  }
+
+  .status-pill {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .team {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 10px;
+    margin-top: 9px;
+  }
+
+  .flag {
+    width: 32px;
+    height: 24px;
+  }
+
+  .team-name {
+    font-size: 17px;
+    line-height: 1.08;
+  }
+
+  .team-details {
+    font-size: 11px;
+    -webkit-line-clamp: 3;
+  }
+
+  .score {
+    min-width: 34px;
+    font-size: 22px;
+  }
+
+  .penalty-strip {
+    margin-top: 9px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .center-stage {
+    min-height: 360px;
+    padding: 18px 0 8px;
+  }
+
+  .center-stage-backdrop {
+    width: min(272px, 90vw);
+    height: 350px;
+    border-radius: 30px;
+  }
+
+  .center-logo-cluster {
+    width: min(230px, 80vw);
+    gap: 10px;
+  }
+
+  .center-logo {
+    max-width: 230px;
+    border-radius: 28px;
+  }
+
+  .center-subtitle {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+  }
+
+  .modal-panel {
+    width: calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+    max-height: calc(100vh - 18px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .modal-close {
+    width: 44px;
+    height: 44px;
+    font-size: 28px;
+  }
+
+  .modal-title {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .modal-title h2 {
+    font-size: 28px;
+    line-height: 1.02;
+  }
+
+  .modal-title > strong {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .modal-scoreline {
+    margin-top: 14px;
+    font-size: 56px;
+  }
+
+  .modal-meta {
+    font-size: 13px;
+  }
+
+  .modal-penalty strong {
+    font-size: 24px;
+  }
+}
+
+
+/* Mobile one-column match timeline */
+@media (max-width: 430px) {
+  .side-left,
+  .side-right { display: block; }
+
+  .side-left .round-column,
+  .side-right .round-column { margin-bottom: 12px; }
+
+  .side-left .round-column:empty,
+  .side-right .round-column:empty { display: none; }
+
+  .match-card + .match-card { margin-top: 10px; }
+
+  .match-modal {
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 8px calc(8px + env(safe-area-inset-bottom, 0px));
   }
 }

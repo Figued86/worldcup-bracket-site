@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>World Cup 2026 Knockout Bracket</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -12,8 +12,11 @@
       <div class="hero-meta meta">
         <span id="dataSource">Loading...</span>
         <span id="lastUpdated">--</span>
+        <span class="refresh-status" id="refreshStatus">Ready</span>
       </div>
     </header>
+
+    <nav class="mobile-round-nav" id="mobileRoundNav" aria-label="Mobile round navigation"></nav>
 
     <section class="bracket" aria-label="World Cup knockout bracket">
       <div class="side side-left" id="leftSide"></div>
@@ -49,6 +52,7 @@
         <strong class="score"></strong>
         <span class="team-details"></span>
       </div>
+      <div class="penalty-strip" hidden></div>
       <div class="match-footer"></div>
     </article>
   </template>

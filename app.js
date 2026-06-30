@@ -8,6 +8,8 @@ const lastUpdated = document.getElementById('lastUpdated');
 const matchModal = document.getElementById('matchModal');
 const modalCard = document.getElementById('modalCard');
 const modalClose = document.getElementById('modalClose');
+const refreshStatus = document.getElementById('refreshStatus');
+const mobileRoundNav = document.getElementById('mobileRoundNav');
 
 function normalizeRound(round = '') {
   const r = round.toLowerCase();
@@ -64,6 +66,23 @@ function formatDate(dateString) {
   return `${parts.hour}:${parts.minute} ${parts.day}/${parts.month}/${parts.year} ${DISPLAY_TIMEZONE_LABEL}`;
 }
 
+function setRefreshStatus(state, message) {
+  if (!refreshStatus) return;
+  refreshStatus.classList.remove('is-loading', 'is-ok', 'is-error');
+  if (state) refreshStatus.classList.add(`is-${state}`);
+  refreshStatus.textContent = message;
+}
+
+function formatRefreshClock(date = new Date()) {
+  return new Intl.DateTimeFormat('vi-VN', {
+    timeZone: DISPLAY_TIMEZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).format(date);
+}
+
 function hasPenaltyShootout(match) {
   return [match?.home?.penalties, match?.away?.penalties].some(value => value !== null && value !== undefined && value !== '' && !Number.isNaN(Number(value)));
 }
@@ -73,6 +92,15 @@ function scoreText(team) {
   if (team.penalties !== null && team.penalties !== undefined) return `${team.score} (${team.penalties})`;
   return String(team.score);
 }
+
+
+function penaltySummary(match) {
+  if (!hasPenaltyShootout(match)) return '';
+  const homePen = Number(match?.home?.penalties ?? 0);
+  const awayPen = Number(match?.away?.penalties ?? 0);
+  return `Pen: ${homePen}-${awayPen}`;
+}
+
 
 function placeholderFlag(teamName) {
   const initials = (teamName || 'TBD').slice(0, 2).toUpperCase();
@@ -175,12 +203,14 @@ function openMatchModal(match) {
   if (!matchModal || !modalCard) return;
   modalCard.innerHTML = matchDetailsHtml(match);
   matchModal.classList.add('is-open');
+  requestAnimationFrame(() => matchModal.classList.add('is-visible'));
   matchModal.setAttribute('aria-hidden', 'false');
 }
 
 function closeMatchModal() {
   if (!matchModal) return;
-  matchModal.classList.remove('is-open');
+  matchModal.classList.remove('is-visible');
+  setTimeout(() => matchModal.classList.remove('is-open'), 180);
   matchModal.setAttribute('aria-hidden', 'true');
 }
 
@@ -206,6 +236,15 @@ function renderMatch(match) {
     row.querySelector('.team-name').textContent = team.name || 'TBD';
     row.querySelector('.score').textContent = scoreText(team);
     row.querySelector('.team-details').textContent = compactDetailText(team);
+  }
+
+  const penaltyEl = node.querySelector('.penalty-strip');
+  if (hasPenaltyShootout(match)) {
+    penaltyEl.hidden = false;
+    penaltyEl.textContent = penaltySummary(match);
+  } else {
+    penaltyEl.hidden = true;
+    penaltyEl.textContent = '';
   }
 
   const venue = match.venue ? ` · ${match.venue}` : '';
@@ -234,6 +273,24 @@ function splitSide(roundMatches, side) {
   return roundMatches.slice(Math.ceil(roundMatches.length / 2));
 }
 
+
+function buildMobileRoundNav(grouped) {
+  if (!mobileRoundNav) return;
+  mobileRoundNav.innerHTML = '';
+  for (const round of ROUND_ORDER) {
+    const count = (grouped[round] || []).length;
+    if (!count) continue;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = `${round.replace('Quarter-finals', 'QF').replace('Semi-finals', 'SF')} (${count})`;
+    button.addEventListener('click', () => {
+      const target = document.querySelector(`.round-column[data-round="${round}"]`);
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    mobileRoundNav.appendChild(button);
+  }
+}
+
 function makeColumn(round, matches) {
   const col = document.createElement('div');
   col.className = 'round-column';
@@ -247,6 +304,7 @@ function render(payload) {
   leftSide.innerHTML = '';
   rightSide.innerHTML = '';
   finalCard.innerHTML = '';
+  buildMobileRoundNav(grouped);
 
   for (const round of ROUND_ORDER) {
     const matches = grouped[round] || [];
@@ -273,13 +331,19 @@ function render(payload) {
 }
 
 async function loadMatches() {
+  setRefreshStatus('loading', 'Refreshing...');
+  document.body.classList.add('is-refreshing');
   try {
     const response = await fetch('/api/matches', { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     render(await response.json());
+    setRefreshStatus('ok', `Live refresh ${formatRefreshClock()}`);
   } catch (error) {
     dataSource.textContent = 'Data: offline';
     lastUpdated.textContent = error.message;
+    setRefreshStatus('error', 'Refresh failed');
+  } finally {
+    document.body.classList.remove('is-refreshing');
   }
 }
 
