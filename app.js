@@ -102,6 +102,50 @@ function penaltySummary(match) {
 }
 
 
+function numericScore(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function getWinnerSide(match) {
+  const homeScore = numericScore(match?.home?.score);
+  const awayScore = numericScore(match?.away?.score);
+  if (homeScore === null || awayScore === null) return '';
+  if (homeScore > awayScore) return 'home';
+  if (awayScore > homeScore) return 'away';
+  if (hasPenaltyShootout(match)) {
+    const homePen = numericScore(match?.home?.penalties);
+    const awayPen = numericScore(match?.away?.penalties);
+    if (homePen !== null && awayPen !== null) {
+      if (homePen > awayPen) return 'home';
+      if (awayPen > homePen) return 'away';
+    }
+  }
+  return '';
+}
+
+function scorerHtml(scorer) {
+  const parsed = parseMaybeJson(scorer);
+  const name = cleanDisplayValue(parsed?.name || parsed?.player || parsed?.scorer || parsed, 'Unknown');
+  const numberValue = parsed?.number || parsed?.shirt_number || parsed?.shirtNumber || parsed?.jersey_number || parsed?.jerseyNumber || '';
+  const number = numberValue ? ` - ${safeHtml(numberValue)}` : ' - No. TBC';
+  const minute = parsed?.minute || parsed?.time || parsed?.elapsed ? ` (${safeHtml(parsed.minute || parsed.time || parsed.elapsed)}')` : '';
+  return `<strong>${safeHtml(name)}</strong>${number}${minute}`;
+}
+
+function scorerListHtml(team) {
+  const scorers = Array.isArray(team.scorers) ? team.scorers : [];
+  return scorers.length ? scorers.map(scorerHtml) : ['No scorer data'];
+}
+
+function compactDetailHtml(team) {
+  const scorers = scorerListHtml(team);
+  const yellow = team.cards?.yellow ?? 0;
+  const red = team.cards?.red ?? 0;
+  return `Goals: ${scorers.join(', ')} · Cards: Y ${safeHtml(yellow)} / R ${safeHtml(red)}`;
+}
+
 function placeholderFlag(teamName) {
   const initials = (teamName || 'TBD').slice(0, 2).toUpperCase();
   return `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -116,6 +160,10 @@ function parseMaybeJson(value) {
   const trimmed = value.trim();
   if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return value;
   try { return JSON.parse(trimmed); } catch (_error) { return value; }
+}
+
+function safeHtml(value) {
+  return String(value ?? '').replace(/[&<>'\"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#039;' }[char]));
 }
 
 function cleanDisplayValue(value, fallback = '') {
@@ -155,7 +203,7 @@ function compactDetailText(team) {
 }
 
 function matchDetailsHtml(match) {
-  const safe = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
+  const safe = safeHtml;
   const penaltyHtml = hasPenaltyShootout(match) ? `
     <div class="modal-penalty has-data">
       <span>Penalty shoot-out</span>
@@ -168,7 +216,7 @@ function matchDetailsHtml(match) {
       <p>Trận này chưa có loạt sút luân lưu hoặc API chưa trả về dữ liệu penalty.</p>
     </div>`;
   const teamBlock = (label, team) => {
-    const scorers = scorerList(team).map(item => `<li>${safe(item)}</li>`).join('');
+    const scorers = scorerListHtml(team).map(item => `<li>${item}</li>`).join('');
     return `
       <section class="modal-team">
         <div class="modal-team-head">
@@ -228,19 +276,24 @@ function renderMatch(match) {
   node.querySelector('.round-name').textContent = round;
   node.querySelector('.status-pill').textContent = match.status || 'TBC';
 
+  const winnerSide = getWinnerSide(match);
+  if (winnerSide) node.classList.add('has-winner');
+
   const teams = [
-    ['.home-team', match.home],
-    ['.away-team', match.away]
+    ['.home-team', match.home, 'home'],
+    ['.away-team', match.away, 'away']
   ];
 
-  for (const [selector, team] of teams) {
+  for (const [selector, team, side] of teams) {
     const row = node.querySelector(selector);
+    row.classList.toggle('winner-team', winnerSide === side);
+    row.classList.toggle('loser-team', Boolean(winnerSide) && winnerSide !== side);
     const img = row.querySelector('.flag');
     img.src = team.flag || placeholderFlag(team.name);
     img.alt = `${team.name || 'TBD'} flag`;
     row.querySelector('.team-name').textContent = team.name || 'TBD';
     row.querySelector('.score').textContent = scoreText(team);
-    row.querySelector('.team-details').textContent = compactDetailText(team);
+    row.querySelector('.team-details').innerHTML = compactDetailHtml(team);
   }
 
   const penaltyEl = node.querySelector('.penalty-strip');

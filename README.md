@@ -94,3 +94,13 @@ Bản này đã sửa lại logic penalty:
 - Pop-up luôn có mục **Penalty shoot-out**. Nếu trận không đá penalty hoặc API chưa trả dữ liệu, mục này sẽ ghi rõ `No penalty data`.
 - Card trận đấu sẽ hiện `Pen: x-y` khi có dữ liệu penalty thật.
 - Mock data đã có một trận mẫu có penalty để test nhanh bằng `DATA_MODE=mock`.
+
+## Winner highlight + scorer corrections
+
+- Winning team row is highlighted automatically.
+- If a match is tied after extra time and has penalty data, the penalty winner is highlighted.
+- Goal scorer names are rendered in bold on both the match card and the match detail popup.
+- Verified correction overrides were added for currently known completed matches:
+  - South Africa 0-1 Canada: Stephen Eustáquio, 90+2
+  - Germany 1-1 Paraguay: Julio Enciso / Kai Havertz, Paraguay wins 4-3 on penalties
+  - Brazil 2-1 Japan: Casemiro, Gabriel Martinelli / Kaishu Sano

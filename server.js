@@ -119,20 +119,57 @@ function canonicalMatchDate(matchNumber, homeName, awayName, fallbackDate) {
   return VERIFIED_KNOCKOUT_TIMES_BY_TEAMS.get(matchupKey) || fallbackDate;
 }
 
+function forceResultByTeam(match, winnerName, loserName, winnerScore, loserScore, winnerPens = null, loserPens = null) {
+  const homeKey = simpleTeamKey(match.home?.name);
+  const awayKey = simpleTeamKey(match.away?.name);
+  const winnerKey = simpleTeamKey(winnerName);
+  const loserKey = simpleTeamKey(loserName);
+
+  if (homeKey === winnerKey && awayKey === loserKey) {
+    match.home.score = winnerScore;
+    match.away.score = loserScore;
+    match.home.penalties = winnerPens;
+    match.away.penalties = loserPens;
+  } else if (homeKey === loserKey && awayKey === winnerKey) {
+    match.home.score = loserScore;
+    match.away.score = winnerScore;
+    match.home.penalties = loserPens;
+    match.away.penalties = winnerPens;
+  }
+  match.status = 'FT';
+  match.statusText = 'Finished';
+}
+
+function setScorersByTeam(match, teamName, scorers) {
+  const key = simpleTeamKey(teamName);
+  if (simpleTeamKey(match.home?.name) === key) match.home.scorers = scorers;
+  if (simpleTeamKey(match.away?.name) === key) match.away.scorers = scorers;
+}
+
 function applyVerifiedMatchCorrections(match) {
   const matchupKey = `${simpleTeamKey(match.home?.name)}||${simpleTeamKey(match.away?.name)}`;
-  if (matchupKey === 'south africa||canada' || matchupKey === 'canada||south africa') {
-    const canadaIsHome = simpleTeamKey(match.home?.name) === 'canada';
-    const canada = canadaIsHome ? match.home : match.away;
-    const southAfrica = canadaIsHome ? match.away : match.home;
 
-    canada.score = 1;
-    southAfrica.score = 0;
-    match.status = 'FT';
-    match.statusText = 'Finished';
-    canada.scorers = [{ name: 'Stephen Eustáquio', number: '7', minute: '90+2' }];
-    southAfrica.scorers = [];
+  if (matchupKey === 'south africa||canada' || matchupKey === 'canada||south africa') {
+    forceResultByTeam(match, 'Canada', 'South Africa', 1, 0);
+    setScorersByTeam(match, 'Canada', [{ name: 'Stephen Eustáquio', number: '7', minute: '90+2' }]);
+    setScorersByTeam(match, 'South Africa', []);
   }
+
+  if (matchupKey === 'germany||paraguay' || matchupKey === 'paraguay||germany') {
+    forceResultByTeam(match, 'Paraguay', 'Germany', 1, 1, 4, 3);
+    setScorersByTeam(match, 'Germany', [{ name: 'Kai Havertz', number: '', minute: '54' }]);
+    setScorersByTeam(match, 'Paraguay', [{ name: 'Julio Enciso', number: '', minute: '42' }]);
+  }
+
+  if (matchupKey === 'brazil||japan' || matchupKey === 'japan||brazil') {
+    forceResultByTeam(match, 'Brazil', 'Japan', 2, 1);
+    setScorersByTeam(match, 'Brazil', [
+      { name: 'Casemiro', number: '', minute: '' },
+      { name: 'Gabriel Martinelli', number: '', minute: '90+' }
+    ]);
+    setScorersByTeam(match, 'Japan', [{ name: 'Kaishu Sano', number: '', minute: '29' }]);
+  }
+
   return match;
 }
 

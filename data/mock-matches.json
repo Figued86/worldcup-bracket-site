@@ -8,22 +8,17 @@
       "date": "2026-06-28T22:00:00Z",
       "venue": "TBC",
       "status": "FT",
-      "statusText": "Finished after penalties",
+      "statusText": "Finished",
       "home": {
         "name": "Germany",
         "flag": "https://flagcdn.com/w80/de.png",
         "score": 1,
-        "penalties": 4,
+        "penalties": 3,
         "scorers": [
           {
-            "name": "Michael Owen",
-            "number": "10",
-            "minute": "23"
-          },
-          {
-            "name": "Demo Striker",
-            "number": "9",
-            "minute": "67"
+            "name": "Kai Havertz",
+            "number": "",
+            "minute": "54"
           }
         ],
         "cards": {
@@ -35,12 +30,12 @@
         "name": "Paraguay",
         "flag": "https://flagcdn.com/w80/py.png",
         "score": 1,
-        "penalties": 3,
+        "penalties": 4,
         "scorers": [
           {
-            "name": "Demo Midfielder",
-            "number": "8",
-            "minute": "51"
+            "name": "Julio Enciso",
+            "number": "",
+            "minute": "42"
           }
         ],
         "cards": {
@@ -84,12 +79,12 @@
       "round": "Round of 32",
       "date": "2026-06-29T22:00:00Z",
       "venue": "TBC",
-      "status": "NS",
-      "statusText": "Not Started",
+      "status": "FT",
+      "statusText": "Finished",
       "home": {
         "name": "South Africa",
         "flag": "https://flagcdn.com/w80/za.png",
-        "score": null,
+        "score": 0,
         "penalties": null,
         "scorers": [],
         "cards": {
@@ -100,9 +95,15 @@
       "away": {
         "name": "Canada",
         "flag": "https://flagcdn.com/w80/ca.png",
-        "score": null,
+        "score": 1,
         "penalties": null,
-        "scorers": [],
+        "scorers": [
+          {
+            "name": "Stephen Eustáquio",
+            "number": "7",
+            "minute": "90+2"
+          }
+        ],
         "cards": {
           "yellow": 0,
           "red": 0
@@ -264,14 +265,25 @@
       "round": "Round of 32",
       "date": "2026-07-02T22:00:00Z",
       "venue": "TBC",
-      "status": "NS",
-      "statusText": "Not Started",
+      "status": "FT",
+      "statusText": "Finished",
       "home": {
         "name": "Brazil",
         "flag": "https://flagcdn.com/w80/br.png",
-        "score": null,
+        "score": 2,
         "penalties": null,
-        "scorers": [],
+        "scorers": [
+          {
+            "name": "Casemiro",
+            "number": "",
+            "minute": ""
+          },
+          {
+            "name": "Gabriel Martinelli",
+            "number": "",
+            "minute": "90+"
+          }
+        ],
         "cards": {
           "yellow": 0,
           "red": 0
@@ -280,9 +292,15 @@
       "away": {
         "name": "Japan",
         "flag": "https://flagcdn.com/w80/jp.png",
-        "score": null,
+        "score": 1,
         "penalties": null,
-        "scorers": [],
+        "scorers": [
+          {
+            "name": "Kaishu Sano",
+            "number": "",
+            "minute": "29"
+          }
+        ],
         "cards": {
           "yellow": 0,
           "red": 0
