@@ -219,6 +219,47 @@ function isMatchPlayed(match) {
   return ['FT', 'AET', 'PEN', 'LIVE', 'HT', 'ET', '1H', '2H', 'ABD', 'AWD', 'WO'].includes(status);
 }
 
+function datePartsInVietnam(date) {
+  if (!date) return null;
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: DISPLAY_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date).reduce((acc, part) => {
+    acc[part.type] = part.value;
+    return acc;
+  }, {});
+  return {
+    year: Number(parts.year),
+    month: Number(parts.month),
+    day: Number(parts.day)
+  };
+}
+
+function utcDayNumberFromParts(parts) {
+  if (!parts) return null;
+  return Math.floor(Date.UTC(parts.year, parts.month - 1, parts.day) / 86400000);
+}
+
+function daysFromTodayInVietnam(dateString) {
+  const matchDate = parseMatchDate(dateString);
+  if (!matchDate) return null;
+  const matchDay = utcDayNumberFromParts(datePartsInVietnam(matchDate));
+  const todayDay = utcDayNumberFromParts(datePartsInVietnam(new Date()));
+  if (matchDay === null || todayDay === null) return null;
+  return matchDay - todayDay;
+}
+
+function upcomingProximityClass(match) {
+  if (isMatchPlayed(match)) return '';
+  const diff = daysFromTodayInVietnam(match?.date);
+  if (diff === null) return 'is-upcoming-later';
+  if (diff <= 0) return 'is-upcoming-today';
+  if (diff === 1) return 'is-upcoming-nextday';
+  return 'is-upcoming-later';
+}
+
 function matchDetailsHtml(match) {
   const safe = safeHtml;
   const penaltyHtml = hasPenaltyShootout(match) ? `
@@ -444,6 +485,8 @@ function renderMatch(match) {
 
   if (winnerSide) node.classList.add('has-winner');
   node.classList.add(played ? 'is-played' : 'is-upcoming');
+  const proximityClass = upcomingProximityClass(match);
+  if (proximityClass) node.classList.add(proximityClass);
 
   const teams = [
     ['.home-team', match.home || {}, 'home'],
