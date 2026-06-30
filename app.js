@@ -157,11 +157,16 @@ function compactDetailText(team) {
 function matchDetailsHtml(match) {
   const safe = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
   const penaltyHtml = hasPenaltyShootout(match) ? `
-    <div class="modal-penalty">
+    <div class="modal-penalty has-data">
       <span>Penalty shoot-out</span>
       <strong>${safe(match.home?.penalties ?? 0)} - ${safe(match.away?.penalties ?? 0)}</strong>
       <p>${safe(match.home?.name || 'Home')} ${safe(match.home?.penalties ?? 0)} - ${safe(match.away?.penalties ?? 0)} ${safe(match.away?.name || 'Away')}</p>
-    </div>` : '';
+    </div>` : `
+    <div class="modal-penalty no-data">
+      <span>Penalty shoot-out</span>
+      <strong>No penalty data</strong>
+      <p>Trận này chưa có loạt sút luân lưu hoặc API chưa trả về dữ liệu penalty.</p>
+    </div>`;
   const teamBlock = (label, team) => {
     const scorers = scorerList(team).map(item => `<li>${safe(item)}</li>`).join('');
     return `

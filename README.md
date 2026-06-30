@@ -85,3 +85,12 @@ Latest update includes:
 - Popup open/close animation.
 - Loading / auto refresh indicator in the header.
 - Penalty shoot-out result shown both on match cards and in the detailed popup.
+
+## Penalty display fix
+
+Bản này đã sửa lại logic penalty:
+
+- Backend đọc penalty từ nhiều dạng field khác nhau: `penalty`, `penalties`, `shootout`, `home_penalty_score`, `away_penalty_score`, `home_pens`, `away_pens`, `score.penalty`, `scores.penalties`, v.v.
+- Pop-up luôn có mục **Penalty shoot-out**. Nếu trận không đá penalty hoặc API chưa trả dữ liệu, mục này sẽ ghi rõ `No penalty data`.
+- Card trận đấu sẽ hiện `Pen: x-y` khi có dữ liệu penalty thật.
+- Mock data đã có một trận mẫu có penalty để test nhanh bằng `DATA_MODE=mock`.

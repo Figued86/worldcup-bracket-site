@@ -400,6 +400,101 @@ function extractCards(item, side, homeId, awayId, homeName, awayName) {
   };
 }
 
+
+function normalizePenaltyValue(value) {
+  if (value === null || value === undefined || value === '' || value === 'null') return null;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  const raw = String(value).trim();
+  if (!raw || raw === '-' || raw.toLowerCase() === 'null') return null;
+  const paren = raw.match(/\((\d+)\)/);
+  if (paren) return Number(paren[1]);
+  const numeric = raw.match(/\d+/);
+  if (!numeric) return null;
+  const n = Number(numeric[0]);
+  return Number.isFinite(n) ? n : null;
+}
+
+function readNestedPenaltyScore(source, side) {
+  if (!source || typeof source !== 'object') return null;
+  const other = side === 'home' ? 'away' : 'home';
+  const candidates = [
+    source[side],
+    source[`${side}_score`],
+    source[`${side}Score`],
+    source[`${side}_penalty`],
+    source[`${side}Penalty`],
+    source[`${side}_penalties`],
+    source[`${side}Penalties`],
+    source[`${side}_pens`],
+    source[`${side}Pens`],
+    source[side === 'home' ? 'team1' : 'team2'],
+    source[side === 'home' ? 'localteam' : 'visitorteam']
+  ];
+  for (const candidate of candidates) {
+    const value = normalizePenaltyValue(candidate);
+    if (value !== null) return value;
+  }
+  // Some APIs return pair strings like "4-3" or "4:3".
+  for (const value of Object.values(source)) {
+    if (typeof value !== 'string') continue;
+    const pair = value.match(/(\d+)\s*[-:]\s*(\d+)/);
+    if (pair) return Number(side === 'home' ? pair[1] : pair[2]);
+  }
+  return null;
+}
+
+function pickPenalty(item, side) {
+  const directKeys = side === 'home'
+    ? [
+        'home_penalty', 'homePenalty', 'home_penalties', 'homePenalties', 'home_pens', 'homePens',
+        'home_penalty_score', 'homePenaltyScore', 'home_score_penalty', 'homeScorePenalty',
+        'home_penalty_goals', 'homePenaltyGoals', 'home_shootout_score', 'homeShootoutScore',
+        'penalty_home', 'penaltyHome', 'penalties_home', 'penaltiesHome', 'pen_home', 'penHome'
+      ]
+    : [
+        'away_penalty', 'awayPenalty', 'away_penalties', 'awayPenalties', 'away_pens', 'awayPens',
+        'away_penalty_score', 'awayPenaltyScore', 'away_score_penalty', 'awayScorePenalty',
+        'away_penalty_goals', 'awayPenaltyGoals', 'away_shootout_score', 'awayShootoutScore',
+        'penalty_away', 'penaltyAway', 'penalties_away', 'penaltiesAway', 'pen_away', 'penAway'
+      ];
+
+  for (const key of directKeys) {
+    const value = normalizePenaltyValue(item[key]);
+    if (value !== null) return value;
+  }
+
+  const nestedSources = [
+    item.penalty,
+    item.penalties,
+    item.penalty_score,
+    item.penaltyScore,
+    item.penalty_scores,
+    item.penaltyScores,
+    item.shootout,
+    item.shootout_score,
+    item.shootoutScore,
+    item.score?.penalty,
+    item.scores?.penalty,
+    item.score?.penalties,
+    item.scores?.penalties,
+    item.result?.penalty,
+    item.result?.penalties,
+    item.goals?.penalty
+  ];
+  for (const source of nestedSources) {
+    const value = readNestedPenaltyScore(source, side);
+    if (value !== null) return value;
+  }
+
+  const scoreValue = side === 'home'
+    ? firstDefined(item.home_score, item.homeScore, item.score_home, item.home_goals, item.homeGoals, item?.score?.home, item?.scores?.home)
+    : firstDefined(item.away_score, item.awayScore, item.score_away, item.away_goals, item.awayGoals, item?.score?.away, item?.scores?.away);
+  const fromScoreText = normalizePenaltyValue(scoreValue);
+  if (typeof scoreValue === 'string' && /\(\d+\)/.test(scoreValue) && fromScoreText !== null) return fromScoreText;
+
+  return null;
+}
+
 function makeTeamPayload(item, side, base, homeId, awayId, homeName, awayName) {
   return {
     ...base,
@@ -546,13 +641,13 @@ function normalizeFreeWorldCupGame(item, index, teamMap = new Map(), stadiumMap 
       name: homeName,
       flag: firstDefined(item.home_team_flag, homeFromMap?.flag, pickTeamFlag(rawHomeTeam), ''),
       score: pickScore(item, 'home'),
-      penalties: firstDefined(item.penalty?.home, item.penalties?.home, item.home_penalty, null)
+      penalties: pickPenalty(item, 'home')
     }, homeId, awayId, homeName, awayName),
     away: makeTeamPayload(item, 'away', {
       name: awayName,
       flag: firstDefined(item.away_team_flag, awayFromMap?.flag, pickTeamFlag(rawAwayTeam), ''),
       score: pickScore(item, 'away'),
-      penalties: firstDefined(item.penalty?.away, item.penalties?.away, item.away_penalty, null)
+      penalties: pickPenalty(item, 'away')
     }, homeId, awayId, homeName, awayName)
   };
   return applyVerifiedMatchCorrections(normalizedMatch);
@@ -580,13 +675,13 @@ function normalizeApiFootballFixture(item, events = []) {
       name: homeName,
       flag: teams.home?.logo || '',
       score: goals.home ?? null,
-      penalties: score.penalty?.home ?? null
+      penalties: pickPenalty({ ...item, score }, 'home')
     }, homeId, awayId, homeName, awayName),
     away: makeTeamPayload(eventCarrier, 'away', {
       name: awayName,
       flag: teams.away?.logo || '',
       score: goals.away ?? null,
-      penalties: score.penalty?.away ?? null
+      penalties: pickPenalty({ ...item, score }, 'away')
     }, homeId, awayId, homeName, awayName)
   };
 }

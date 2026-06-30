@@ -8,12 +8,12 @@
       "date": "2026-06-28T22:00:00Z",
       "venue": "TBC",
       "status": "FT",
-      "statusText": "Finished",
+      "statusText": "Finished after penalties",
       "home": {
         "name": "Germany",
         "flag": "https://flagcdn.com/w80/de.png",
-        "score": 2,
-        "penalties": null,
+        "score": 1,
+        "penalties": 4,
         "scorers": [
           {
             "name": "Michael Owen",
@@ -35,7 +35,7 @@
         "name": "Paraguay",
         "flag": "https://flagcdn.com/w80/py.png",
         "score": 1,
-        "penalties": null,
+        "penalties": 3,
         "scorers": [
           {
             "name": "Demo Midfielder",
