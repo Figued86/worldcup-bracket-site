@@ -104,3 +104,8 @@ Bản này đã sửa lại logic penalty:
   - South Africa 0-1 Canada: Stephen Eustáquio, 90+2
   - Germany 1-1 Paraguay: Julio Enciso / Kai Havertz, Paraguay wins 4-3 on penalties
   - Brazil 2-1 Japan: Casemiro, Gabriel Martinelli / Kaishu Sano
+
+## Black-gold theme update
+
+- Site tone updated to a deeper black-gold World Cup look.
+- Match cards, modal, mobile navigation, refresh indicator, winner highlight, and upcoming-match dimming are aligned with the new dark stadium background.
