@@ -64,11 +64,24 @@ function formatDate(dateString) {
   return `${parts.hour}:${parts.minute} ${parts.day}/${parts.month}/${parts.year} ${DISPLAY_TIMEZONE_LABEL}`;
 }
 
+function hasPenaltyShootout(match) {
+  return [match?.home?.penalties, match?.away?.penalties].some(value => value !== null && value !== undefined && value !== '' && !Number.isNaN(Number(value)));
+}
+
 function scoreText(team) {
   if (team.score === null || team.score === undefined) return '-';
   if (team.penalties !== null && team.penalties !== undefined) return `${team.score} (${team.penalties})`;
   return String(team.score);
 }
+
+
+function penaltySummary(match) {
+  if (!hasPenaltyShootout(match)) return '';
+  const homePen = Number(match?.home?.penalties ?? 0);
+  const awayPen = Number(match?.away?.penalties ?? 0);
+  return `Pen: ${homePen}-${awayPen}`;
+}
+
 
 function placeholderFlag(teamName) {
   const initials = (teamName || 'TBD').slice(0, 2).toUpperCase();
@@ -124,6 +137,12 @@ function compactDetailText(team) {
 
 function matchDetailsHtml(match) {
   const safe = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
+  const penaltyHtml = hasPenaltyShootout(match) ? `
+    <div class="modal-penalty">
+      <span>Penalty shoot-out</span>
+      <strong>${safe(match.home?.penalties ?? 0)} - ${safe(match.away?.penalties ?? 0)}</strong>
+      <p>${safe(match.home?.name || 'Home')} ${safe(match.home?.penalties ?? 0)} - ${safe(match.away?.penalties ?? 0)} ${safe(match.away?.name || 'Away')}</p>
+    </div>` : '';
   const teamBlock = (label, team) => {
     const scorers = scorerList(team).map(item => `<li>${safe(item)}</li>`).join('');
     return `
@@ -154,6 +173,7 @@ function matchDetailsHtml(match) {
     </div>
     <div class="modal-scoreline">${safe(scoreText(match.home))} : ${safe(scoreText(match.away))}</div>
     <div class="modal-meta">${safe(formatDate(match.date))}${match.venue ? ` · ${safe(match.venue)}` : ''}</div>
+    ${penaltyHtml}
     <div class="modal-teams">
       ${teamBlock('Home team', match.home || {})}
       ${teamBlock('Away team', match.away || {})}
@@ -195,6 +215,15 @@ function renderMatch(match) {
     row.querySelector('.team-name').textContent = team.name || 'TBD';
     row.querySelector('.score').textContent = scoreText(team);
     row.querySelector('.team-details').textContent = compactDetailText(team);
+  }
+
+  const penaltyEl = node.querySelector('.penalty-strip');
+  if (hasPenaltyShootout(match)) {
+    penaltyEl.hidden = false;
+    penaltyEl.textContent = penaltySummary(match);
+  } else {
+    penaltyEl.hidden = true;
+    penaltyEl.textContent = '';
   }
 
   const venue = match.venue ? ` · ${match.venue}` : '';
