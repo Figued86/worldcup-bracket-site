@@ -23,7 +23,7 @@ body {
   background:
     linear-gradient(rgba(8, 12, 56, 0.82), rgba(6, 9, 39, 0.92)),
     radial-gradient(circle at 50% 42%, rgba(111, 233, 255, 0.08), transparent 26rem),
-    url('assets/bg-worldcup-ref.jpg') center/cover no-repeat fixed,
+    url('assets/world-cup-bracket-hero.jpeg') center/cover no-repeat fixed,
     var(--bg);
   position: relative;
 }
@@ -158,7 +158,26 @@ body::before {
   overflow: hidden;
   position: relative;
   cursor: pointer;
-  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  opacity: 1;
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease, filter 160ms ease;
+}
+
+.match-card.is-upcoming {
+  opacity: 0.48;
+  filter: saturate(0.72);
+  border-color: rgba(255,255,255,0.10);
+  background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 10px rgba(0,0,0,0.14);
+}
+
+.match-card.is-upcoming .status-pill {
+  background: rgba(255,255,255,0.16);
+  color: rgba(255,255,255,0.88);
+}
+
+.match-card.is-played {
+  opacity: 1;
+  filter: none;
 }
 
 .match-card::after {
@@ -312,8 +331,7 @@ body::before {
   width: 100%;
   max-width: 280px;
   display: block;
-  border-radius: 34px;
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.26);
+  filter: drop-shadow(0 18px 50px rgba(0, 0, 0, 0.42));
 }
 
 .center-subtitle {
@@ -660,7 +678,7 @@ body::before {
     background:
       linear-gradient(rgba(8, 12, 56, 0.86), rgba(6, 9, 39, 0.94)),
       radial-gradient(circle at 50% 22%, rgba(111, 233, 255, 0.11), transparent 16rem),
-      url('assets/bg-worldcup-ref.jpg') center top/cover no-repeat,
+      url('assets/world-cup-bracket-hero.jpeg') center top/cover no-repeat,
       var(--bg);
   }
 
@@ -869,6 +887,11 @@ body::before {
 
 .team.loser-team {
   opacity: 0.72;
+}
+
+.match-card.is-upcoming .team.loser-team,
+.match-card.is-upcoming .team.winner-team {
+  opacity: 1;
 }
 
 .team-details strong,
