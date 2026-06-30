@@ -121,3 +121,10 @@ Bản này đã sửa lại logic penalty:
   - Ngày kế tiếp: mờ hơn.
   - Xa hơn: chìm sâu vào nền.
 - Logic này tự cập nhật theo ngày, không cần sửa thủ công.
+
+
+## Latest adjustment
+
+- Main bracket cards now show abbreviated country names only, maximum 5 first letters.
+- Goal scorers, goal minutes, yellow cards and red cards are hidden from the main bracket.
+- Full match details remain available inside the match pop-up.

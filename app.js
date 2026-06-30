@@ -118,6 +118,19 @@ function cleanDisplayValue(value, fallback = '') {
   return String(parsed || fallback).trim();
 }
 
+function abbreviateTeamName(name) {
+  const raw = String(name || 'TBD').trim();
+  if (!raw || raw.toUpperCase() === 'TBD') return 'TBD';
+
+  const lettersOnly = raw
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toUpperCase();
+
+  return (lettersOnly || raw.toUpperCase()).slice(0, 5);
+}
+
 function placeholderFlag(teamName) {
   const initials = (teamName || 'TBD').slice(0, 2).toUpperCase();
   return `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -500,9 +513,13 @@ function renderMatch(match) {
     const img = row.querySelector('.flag');
     img.src = team.flag || placeholderFlag(team.name);
     img.alt = `${team.name || 'TBD'} flag`;
-    row.querySelector('.team-name').textContent = team.name || 'TBD';
+    const teamNameEl = row.querySelector('.team-name');
+    teamNameEl.textContent = abbreviateTeamName(team.name);
+    teamNameEl.title = team.name || 'TBD';
     row.querySelector('.score').textContent = scoreText(team);
-    row.querySelector('.team-details').innerHTML = compactDetailHtml(team);
+    const detailsEl = row.querySelector('.team-details');
+    detailsEl.innerHTML = '';
+    detailsEl.hidden = true;
   }
 
   const penaltyEl = node.querySelector('.penalty-strip');

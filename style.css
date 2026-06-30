@@ -1105,3 +1105,39 @@ body::after {
     -webkit-line-clamp: 1;
   }
 }
+
+
+/* Main page simplified display: abbreviated country names only; detailed stats stay in pop-up */
+.match-card .team-details {
+  display: none !important;
+}
+
+.match-card .team-name {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/* Rebalance compact score layout after removing goal/card lines from cards */
+.match-card {
+  min-height: 126px;
+}
+
+.team {
+  grid-template-rows: auto;
+  min-height: 52px;
+}
+
+.flag {
+  grid-row: 1;
+}
+
+.score {
+  grid-row: 1;
+}
+
+@media (max-width: 430px) {
+  .match-card { min-height: 142px; }
+  .team-name { letter-spacing: 0.08em; }
+}
