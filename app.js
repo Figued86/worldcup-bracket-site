@@ -74,15 +74,6 @@ function scoreText(team) {
   return String(team.score);
 }
 
-
-function penaltySummary(match) {
-  if (!hasPenaltyShootout(match)) return '';
-  const homePen = Number(match?.home?.penalties ?? 0);
-  const awayPen = Number(match?.away?.penalties ?? 0);
-  return `Pen: ${homePen}-${awayPen}`;
-}
-
-
 function placeholderFlag(teamName) {
   const initials = (teamName || 'TBD').slice(0, 2).toUpperCase();
   return `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -215,15 +206,6 @@ function renderMatch(match) {
     row.querySelector('.team-name').textContent = team.name || 'TBD';
     row.querySelector('.score').textContent = scoreText(team);
     row.querySelector('.team-details').textContent = compactDetailText(team);
-  }
-
-  const penaltyEl = node.querySelector('.penalty-strip');
-  if (hasPenaltyShootout(match)) {
-    penaltyEl.hidden = false;
-    penaltyEl.textContent = penaltySummary(match);
-  } else {
-    penaltyEl.hidden = true;
-    penaltyEl.textContent = '';
   }
 
   const venue = match.venue ? ` · ${match.venue}` : '';
