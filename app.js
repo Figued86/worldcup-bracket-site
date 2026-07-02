@@ -278,6 +278,11 @@ function isMatchPlayed(match) {
   return ['FT', 'AET', 'PEN', 'LIVE', 'HT', 'ET', '1H', '2H', 'ABD', 'AWD', 'WO'].includes(status);
 }
 
+function isLiveStatus(status) {
+  const normalized = String(status || '').toUpperCase();
+  return ['LIVE', 'HT', 'ET', '1H', '2H', 'IN PLAY'].includes(normalized);
+}
+
 function datePartsInVietnam(date) {
   if (!date) return null;
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -355,10 +360,8 @@ function matchDetailsHtml(match) {
 
   return `
     <div class="modal-title">
-      <div>
-        <span>${safe(normalizeRound(match.round))}</span>
-        <h2>${safe(match.home?.name || 'TBD')} vs ${safe(match.away?.name || 'TBD')}</h2>
-      </div>
+      <span>${safe(normalizeRound(match.round))}</span>
+      <h2>${safe(match.home?.name || 'TBD')} vs ${safe(match.away?.name || 'TBD')}</h2>
       <strong>${safe(match.status || 'TBC')}</strong>
     </div>
     <div class="modal-scoreline">${safe(scoreText(match.home))} : ${safe(scoreText(match.away))}</div>
@@ -540,7 +543,14 @@ function renderMatch(match) {
   const played = isMatchPlayed(match);
 
   node.querySelector('.round-name').textContent = round;
-  node.querySelector('.status-pill').textContent = match.status || 'TBC';
+  const statusValue = match.status || 'TBC';
+  const statusPill = node.querySelector('.status-pill');
+  statusPill.textContent = statusValue;
+
+  if (isLiveStatus(statusValue)) {
+    node.classList.add('is-live');
+    statusPill.classList.add('is-live');
+  }
 
   if (winnerSide) node.classList.add('has-winner');
   node.classList.add(played ? 'is-played' : 'is-upcoming');
