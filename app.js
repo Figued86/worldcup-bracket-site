@@ -118,6 +118,65 @@ function cleanDisplayValue(value, fallback = '') {
   return String(parsed || fallback).trim();
 }
 
+const FIFA_TEAM_CODES = {
+  'ARGENTINA': 'ARG',
+  'AUSTRALIA': 'AUS',
+  'AUSTRIA': 'AUT',
+  'BELGIUM': 'BEL',
+  'BOSNIAHERZEGOVINA': 'BIH',
+  'BOSNIA AND HERZEGOVINA': 'BIH',
+  'BRAZIL': 'BRA',
+  'CANADA': 'CAN',
+  'CAPEVERDE': 'CPV',
+  'CROATIA': 'CRO',
+  'DRCONGO': 'COD',
+  'ECUADOR': 'ECU',
+  'EGYPT': 'EGY',
+  'ENGLAND': 'ENG',
+  'FRANCE': 'FRA',
+  'GERMANY': 'GER',
+  'GHANA': 'GHA',
+  'IVORYCOAST': 'CIV',
+  "COTE D'IVOIRE": 'CIV',
+  'JAPAN': 'JPN',
+  'MEXICO': 'MEX',
+  'MOROCCO': 'MAR',
+  'NETHERLANDS': 'NED',
+  'NORWAY': 'NOR',
+  'PARAGUAY': 'PAR',
+  'PORTUGAL': 'POR',
+  'SENEGAL': 'SEN',
+  'SOUTHAFRICA': 'RSA',
+  'SPAIN': 'ESP',
+  'SWEDEN': 'SWE',
+  'SWITZERLAND': 'SUI',
+  'UNITEDSTATES': 'USA',
+  'UNITED STATES': 'USA',
+  'ALGERIA': 'ALG'
+};
+
+function abbreviateTeamName(name) {
+  const raw = String(name || 'TBD').trim();
+  if (!raw || raw.toUpperCase() === 'TBD') return 'TBD';
+
+  const normalized = raw
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9 ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toUpperCase();
+
+  const compact = normalized.replace(/\s+/g, '').trim();
+  return FIFA_TEAM_CODES[normalized] || FIFA_TEAM_CODES[compact] || compact.slice(0, 3) || 'TBD';
+}
+
+function mainCardTeamName(name, played) {
+  const raw = String(name || 'TBD').trim();
+  if (!raw) return 'TBD';
+  return played ? abbreviateTeamName(raw) : raw.toUpperCase();
+}
+
 function placeholderFlag(teamName) {
   const initials = (teamName || 'TBD').slice(0, 2).toUpperCase();
   return `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -500,9 +559,13 @@ function renderMatch(match) {
     const img = row.querySelector('.flag');
     img.src = team.flag || placeholderFlag(team.name);
     img.alt = `${team.name || 'TBD'} flag`;
-    row.querySelector('.team-name').textContent = team.name || 'TBD';
+    const teamNameEl = row.querySelector('.team-name');
+    teamNameEl.textContent = mainCardTeamName(team.name, played);
+    teamNameEl.title = team.name || 'TBD';
     row.querySelector('.score').textContent = scoreText(team);
-    row.querySelector('.team-details').innerHTML = compactDetailHtml(team);
+    const detailsEl = row.querySelector('.team-details');
+    detailsEl.innerHTML = '';
+    detailsEl.hidden = true;
   }
 
   const penaltyEl = node.querySelector('.penalty-strip');
