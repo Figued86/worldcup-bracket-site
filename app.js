@@ -400,7 +400,10 @@ function normalizeYouTubeEmbedUrl(url) {
     let videoId = '';
     if (host === 'youtu.be') videoId = parsed.pathname.split('/').filter(Boolean)[0] || '';
     if (host.includes('youtube.com')) {
-      if (parsed.pathname.startsWith('/embed/')) return url;
+      if (parsed.pathname.startsWith('/embed/')) {
+        videoId = parsed.pathname.split('/').filter(Boolean)[1] || '';
+        return videoId ? `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?rel=0&modestbranding=1` : '';
+      }
       if (parsed.pathname.startsWith('/shorts/')) videoId = parsed.pathname.split('/').filter(Boolean)[1] || '';
       videoId = videoId || parsed.searchParams.get('v') || '';
     }
@@ -463,8 +466,8 @@ function highlightVideoHtml(match = {}) {
 
   const youtube = normalizeYouTubeEmbedUrl(rawUrl);
   const vimeo = normalizeVimeoEmbedUrl(rawUrl);
-  const embedUrl = youtube || vimeo || (/\/embed\//i.test(rawUrl) ? rawUrl : '');
-  const isDirectVideo = /\.(mp4|webm|ogg)(\?|#|$)/i.test(rawUrl);
+  const embedUrl = youtube || vimeo;
+  const isDirectVideo = /^https?:\/\//i.test(rawUrl) && /\.(mp4|webm|ogg)(\?|#|$)/i.test(rawUrl);
 
   if (embedUrl) {
     return `

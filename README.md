@@ -159,3 +159,30 @@ If the popup still shows no embedded video:
 5. The demo/mock match data may not correspond to real highlight videos on YouTube. For guaranteed display, add `highlightUrl` directly to a match record.
 
 The frontend also shows a quick YouTube search link when no embeddable video is found.
+
+
+## Security hardening notes
+
+This build includes basic server-side hardening for public deployment:
+
+- `helmet` security headers and Content Security Policy.
+- Restricted CORS through `CORS_ORIGINS`, `SITE_URL`, or `RENDER_EXTERNAL_URL`.
+- Simple per-IP API rate limit for `/api/*`.
+- Hidden internal server errors by default through `EXPOSE_SERVER_ERRORS=false`.
+- Safer highlight video handling: only YouTube, YouTube NoCookie, Vimeo, or direct `.mp4/.webm/.ogg` links are embedded. Unknown iframe/embed URLs are blocked and shown as external links only.
+- `.gitignore` protects `.env`, `node_modules/`, `.DS_Store`, and editor files.
+
+Recommended Render environment values:
+
+```env
+SITE_URL=https://your-site.onrender.com
+CORS_ORIGINS=https://your-site.onrender.com
+EXPOSE_SERVER_ERRORS=false
+API_RATE_LIMIT_WINDOW_MS=60000
+API_RATE_LIMIT_MAX=180
+YOUTUBE_API_KEY=your_real_youtube_api_key
+ENABLE_AUTO_HIGHLIGHT_SEARCH=true
+ALLOW_UNVERIFIED_VIDEO_SEARCH=false
+```
+
+Never commit `.env`, API keys, GitHub tokens, or Google credentials to GitHub.

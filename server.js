@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -19,6 +20,80 @@ const SEASON = process.env.WORLD_CUP_SEASON || '2026';
 const FREE_API_URL = process.env.FREE_API_URL || 'https://worldcup26.ir/get/games';
 const FREE_TEAMS_URL = process.env.FREE_TEAMS_URL || 'https://worldcup26.ir/get/teams';
 const FREE_STADIUMS_URL = process.env.FREE_STADIUMS_URL || 'https://worldcup26.ir/get/stadiums';
+
+
+// Security hardening. Keep these as server-side environment variables on Render.
+const DEFAULT_ALLOWED_ORIGINS = [
+  process.env.SITE_URL,
+  process.env.PUBLIC_SITE_URL,
+  process.env.RENDER_EXTERNAL_URL,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+].filter(Boolean);
+const ALLOWED_ORIGINS = String(process.env.CORS_ORIGINS || DEFAULT_ALLOWED_ORIGINS.join(','))
+  .split(',')
+  .map(value => value.trim())
+  .filter(Boolean);
+const EXPOSE_SERVER_ERRORS = String(process.env.EXPOSE_SERVER_ERRORS || 'false').toLowerCase() === 'true';
+const API_RATE_LIMIT_WINDOW_MS = Number(process.env.API_RATE_LIMIT_WINDOW_MS || 60_000);
+const API_RATE_LIMIT_MAX = Number(process.env.API_RATE_LIMIT_MAX || 180);
+const allowedIframeHosts = new Set(['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com', 'youtube-nocookie.com', 'player.vimeo.com']);
+const allowedDirectVideoExtensions = /\.(mp4|webm|ogg)(\?|#|$)/i;
+const apiRateBuckets = new Map();
+
+function isAllowedOrigin(origin = '') {
+  if (!origin) return true;
+  if (!ALLOWED_ORIGINS.length) return false;
+  return ALLOWED_ORIGINS.some(allowed => {
+    if (allowed === '*') return true;
+    if (allowed === origin) return true;
+    if (allowed.endsWith('/*')) return origin.startsWith(allowed.slice(0, -1));
+    return false;
+  });
+}
+
+function apiRateLimit(req, res, next) {
+  if (!API_RATE_LIMIT_MAX || API_RATE_LIMIT_MAX < 1) return next();
+  const now = Date.now();
+  const key = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+  const bucket = apiRateBuckets.get(key) || { count: 0, resetAt: now + API_RATE_LIMIT_WINDOW_MS };
+  if (now > bucket.resetAt) {
+    bucket.count = 0;
+    bucket.resetAt = now + API_RATE_LIMIT_WINDOW_MS;
+  }
+  bucket.count += 1;
+  apiRateBuckets.set(key, bucket);
+  if (bucket.count > API_RATE_LIMIT_MAX) {
+    res.setHeader('Retry-After', Math.ceil((bucket.resetAt - now) / 1000));
+    return res.status(429).json({ ok: false, error: 'Too many requests. Please try again shortly.' });
+  }
+  return next();
+}
+
+function publicErrorMessage(error) {
+  if (EXPOSE_SERVER_ERRORS) return error?.message || 'Unknown server error';
+  return 'Data source temporarily unavailable';
+}
+
+function isSafeHighlightUrl(value = '') {
+  try {
+    const url = new URL(String(value || '').trim());
+    if (!['https:', 'http:'].includes(url.protocol)) return false;
+    const host = url.hostname.replace(/^www\./, '').toLowerCase();
+    const originalHost = url.hostname.toLowerCase();
+    if (host === 'youtube.com' || host === 'youtu.be' || host === 'youtube-nocookie.com') return true;
+    if (host === 'vimeo.com' || originalHost === 'player.vimeo.com') return true;
+    if (allowedDirectVideoExtensions.test(url.pathname)) return true;
+    return false;
+  } catch (_error) {
+    return false;
+  }
+}
+
+function safeHighlightUrl(value = '') {
+  const text = String(value || '').trim();
+  return isSafeHighlightUrl(text) ? text : '';
+}
 
 // Optional automatic highlight lookup. Uses the official YouTube Data API on the server.
 // Keep the key in Render/GitHub secrets or .env only; never expose it in frontend JS.
@@ -190,8 +265,49 @@ function applyVerifiedMatchCorrections(match) {
 let cachedPayload = null;
 let cachedAt = 0;
 
-app.use(cors());
-app.use(express.static(__dirname));
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'"],
+      frameSrc: ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com', 'https://player.vimeo.com'],
+      mediaSrc: ["'self'", 'https:'],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'self'"]
+    }
+  },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}));
+
+app.use(cors({
+  origin(origin, callback) {
+    if (isAllowedOrigin(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET', 'HEAD', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  maxAge: 86400
+}));
+
+app.use('/api', apiRateLimit);
+app.use(express.static(__dirname, {
+  dotfiles: 'ignore',
+  etag: true,
+  maxAge: '1h',
+  setHeaders(res) {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+  }
+}));
 
 function roundRank(roundName = '') {
   const r = String(roundName).toLowerCase();
@@ -234,13 +350,13 @@ function pickHighlightMedia(item = {}) {
   ];
   for (const value of candidates) {
     if (!value) continue;
-    if (typeof value === 'string') return value;
+    if (typeof value === 'string') return safeHighlightUrl(value);
     if (Array.isArray(value)) {
       const found = value.find(entry => entry && (typeof entry === 'string' || entry.url || entry.href || entry.embed || entry.embedUrl));
-      if (typeof found === 'string') return found;
-      if (found) return found.embedUrl || found.embed_url || found.embed || found.url || found.href || found.videoUrl || found.video_url || '';
+      if (typeof found === 'string') return safeHighlightUrl(found);
+      if (found) return safeHighlightUrl(found.embedUrl || found.embed_url || found.embed || found.url || found.href || found.videoUrl || found.video_url || '');
     }
-    if (typeof value === 'object') return value.embedUrl || value.embed_url || value.embed || value.url || value.href || value.videoUrl || value.video_url || '';
+    if (typeof value === 'object') return safeHighlightUrl(value.embedUrl || value.embed_url || value.embed || value.url || value.href || value.videoUrl || value.video_url || '');
   }
   return '';
 }
@@ -1002,7 +1118,7 @@ async function getMatches() {
     cachedPayload = await enrichMatchesWithHighlights({
       ...fallback,
       source: 'mock-fallback',
-      error: error.message
+      error: publicErrorMessage(error)
     });
   }
   cachedAt = now;
@@ -1022,6 +1138,12 @@ app.get('/api/health', async (_req, res) => {
     matchCount: payload.matches?.length || 0,
     autoHighlightSearch: Boolean(ENABLE_AUTO_HIGHLIGHT_SEARCH && YOUTUBE_API_KEY && YOUTUBE_API_KEY !== 'your_youtube_api_key_here'),
     highlightVideoCount: (payload.matches || []).filter(match => pickHighlightMedia(match)).length,
+    security: {
+      helmet: true,
+      corsRestricted: Boolean(ALLOWED_ORIGINS.length && !ALLOWED_ORIGINS.includes('*')),
+      rateLimit: Boolean(API_RATE_LIMIT_MAX && API_RATE_LIMIT_MAX > 0),
+      unsafeVideoEmbedsBlocked: true
+    },
     error: payload.error || null,
     updatedAt: payload.updatedAt
   });

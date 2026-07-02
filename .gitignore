@@ -1,6 +1,20 @@
-
-.DS_Store
-node_modules/
+# Local secrets and environment files
 .env
-.DS_Store
+.env.*
+!.env.example
+
+# Dependencies and build/cache outputs
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+.cache/
+dist/
+build/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
