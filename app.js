@@ -7,9 +7,18 @@ const EXPECTED_ROUND_COUNTS = {
   'Final': 1
 };
 
+const ROUND_SHORT_LABELS = {
+  'Round of 32': 'R32 (16)',
+  'Round of 16': 'R16 (8)',
+  'Quarter-finals': 'QF (4)',
+  'Semi-finals': 'SF (2)',
+  'Final': 'FINAL (1)'
+};
+
 const leftSide = document.getElementById('leftSide');
 const rightSide = document.getElementById('rightSide');
 const finalCard = document.getElementById('finalCard');
+const linearBracket = document.getElementById('linearBracket');
 const template = document.getElementById('matchTemplate');
 const dataSource = document.getElementById('dataSource');
 const lastUpdated = document.getElementById('lastUpdated');
@@ -550,10 +559,10 @@ function buildMobileRoundNav(grouped) {
     if (!count) continue;
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = `${round.replace('Quarter-finals', 'QF').replace('Semi-finals', 'SF')} (${count})`;
+    button.textContent = ROUND_SHORT_LABELS[round] || `${round} (${count})`;
     button.addEventListener('click', () => {
       const target = document.querySelector(`.round-column[data-round="${round}"]`);
-      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
     });
     mobileRoundNav.appendChild(button);
   }
@@ -630,28 +639,35 @@ function makeColumn(round, matches) {
   const col = document.createElement('div');
   col.className = 'round-column';
   col.dataset.round = round;
+  col.dataset.roundLabel = ROUND_SHORT_LABELS[round] || round;
   for (const match of matches) col.appendChild(renderMatch(match));
   return col;
 }
 
 function render(payload) {
   const grouped = buildBracket(payload.matches || []);
-  leftSide.innerHTML = '';
-  rightSide.innerHTML = '';
-  finalCard.innerHTML = '';
-  buildMobileRoundNav(grouped);
-
-  for (const round of ROUND_ORDER) {
-    const matches = grouped[round] || [];
-    if (round === 'Final') {
-      if (matches[0]) finalCard.appendChild(renderMatch(matches[0]));
-      leftSide.appendChild(makeColumn(round, matches));
-      rightSide.appendChild(makeColumn(round, []));
-      continue;
+  if (linearBracket) {
+    linearBracket.innerHTML = '';
+    for (const round of ROUND_ORDER) {
+      linearBracket.appendChild(makeColumn(round, grouped[round] || []));
     }
-    leftSide.appendChild(makeColumn(round, splitSide(matches, 'left')));
-    rightSide.appendChild(makeColumn(round, splitSide(matches, 'right')));
+  } else {
+    if (leftSide) leftSide.innerHTML = '';
+    if (rightSide) rightSide.innerHTML = '';
+    if (finalCard) finalCard.innerHTML = '';
+    for (const round of ROUND_ORDER) {
+      const matches = grouped[round] || [];
+      if (round === 'Final') {
+        if (matches[0] && finalCard) finalCard.appendChild(renderMatch(matches[0]));
+        if (leftSide) leftSide.appendChild(makeColumn(round, matches));
+        if (rightSide) rightSide.appendChild(makeColumn(round, []));
+        continue;
+      }
+      if (leftSide) leftSide.appendChild(makeColumn(round, splitSide(matches, 'left')));
+      if (rightSide) rightSide.appendChild(makeColumn(round, splitSide(matches, 'right')));
+    }
   }
+  buildMobileRoundNav(grouped);
 
   dataSource.textContent = `Data: ${payload.source || 'unknown'}`;
   lastUpdated.textContent = `Updated: ${formatDate(payload.updatedAt)}`;

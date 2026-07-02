@@ -18,19 +18,9 @@
 
     <nav class="mobile-round-nav" id="mobileRoundNav" aria-label="Mobile round navigation"></nav>
 
-    <section class="bracket" aria-label="World Cup knockout bracket">
-      <div class="side side-left" id="leftSide"></div>
-
-      <div class="center-stage">
-        <div class="center-stage-backdrop" aria-hidden="true"></div>
-        <div class="center-logo-cluster" aria-label="World Cup 2026 logo cluster">
-          <img class="center-logo" src="assets/fifa-world-cup-2026--white.10e0b37b.png" alt="World Cup 2026 logo" />
-          <p class="center-subtitle">KNOCKOUT STAGE</p>
-        </div>
-        <div class="final-card" id="finalCard"></div>
-      </div>
-
-      <div class="side side-right" id="rightSide"></div>
+    <section class="bracket linear-view" aria-label="World Cup knockout bracket">
+      <div class="bracket-scroll-hint">Vuốt ngang để xem: R32 → R16 → QF → SF → FINAL</div>
+      <div class="linear-bracket" id="linearBracket"></div>
     </section>
   </main>
 
