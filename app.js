@@ -376,6 +376,114 @@ function modalNavHtml() {
     <button class="modal-match-nav modal-match-nav-next" type="button" data-modal-nav="next" aria-label="Xem trận tiếp theo" ${hasNext ? '' : 'disabled'}>›</button>`;
 }
 
+
+function extractHighlightSource(match = {}) {
+  const direct = match.highlightUrl || match.highlight_url || match.highlightsUrl || match.highlights_url || match.videoUrl || match.video_url || match.video || match.highlights || '';
+  if (typeof direct === 'string') return cleanSpacingArtifacts(direct);
+  if (Array.isArray(direct)) {
+    const first = direct.find(item => item && (typeof item === 'string' || item.url || item.href || item.embed || item.embedUrl));
+    return extractHighlightSource({ highlightUrl: first });
+  }
+  if (direct && typeof direct === 'object') {
+    return cleanSpacingArtifacts(direct.embedUrl || direct.embed_url || direct.embed || direct.url || direct.href || direct.videoUrl || direct.video_url || '');
+  }
+  return '';
+}
+
+function normalizeYouTubeEmbedUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, '').toLowerCase();
+    let videoId = '';
+    if (host === 'youtu.be') videoId = parsed.pathname.split('/').filter(Boolean)[0] || '';
+    if (host.includes('youtube.com')) {
+      if (parsed.pathname.startsWith('/embed/')) return url;
+      if (parsed.pathname.startsWith('/shorts/')) videoId = parsed.pathname.split('/').filter(Boolean)[1] || '';
+      videoId = videoId || parsed.searchParams.get('v') || '';
+    }
+    if (!videoId) return '';
+    return `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?rel=0&modestbranding=1`;
+  } catch (_error) {
+    return '';
+  }
+}
+
+function normalizeVimeoEmbedUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, '').toLowerCase();
+    if (!host.includes('vimeo.com')) return '';
+    if (host === 'player.vimeo.com') return url;
+    const videoId = parsed.pathname.split('/').filter(Boolean).find(part => /^\d+$/.test(part));
+    return videoId ? `https://player.vimeo.com/video/${videoId}` : '';
+  } catch (_error) {
+    return '';
+  }
+}
+
+function highlightVideoHtml(match = {}) {
+  const rawUrl = extractHighlightSource(match);
+  const played = isMatchPlayed(match);
+  if (!played) {
+    return `
+      <section class="modal-highlight is-empty">
+        <div class="modal-highlight-head">
+          <span>Goal highlights</span>
+          <strong>Video sẽ hiển thị sau khi trận đấu kết thúc</strong>
+        </div>
+      </section>`;
+  }
+  if (!rawUrl) {
+    return `
+      <section class="modal-highlight is-empty">
+        <div class="modal-highlight-head">
+          <span>Goal highlights</span>
+          <strong>Chưa có link video highlight cho trận này</strong>
+        </div>
+      </section>`;
+  }
+
+  const youtube = normalizeYouTubeEmbedUrl(rawUrl);
+  const vimeo = normalizeVimeoEmbedUrl(rawUrl);
+  const embedUrl = youtube || vimeo || (/\/embed\//i.test(rawUrl) ? rawUrl : '');
+  const isDirectVideo = /\.(mp4|webm|ogg)(\?|#|$)/i.test(rawUrl);
+
+  if (embedUrl) {
+    return `
+      <section class="modal-highlight has-video">
+        <div class="modal-highlight-head">
+          <span>Goal highlights</span>
+          <strong>Highlight bàn thắng</strong>
+        </div>
+        <div class="modal-video-frame">
+          <iframe src="${safeHtml(embedUrl)}" title="Match goal highlights" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+      </section>`;
+  }
+
+  if (isDirectVideo) {
+    return `
+      <section class="modal-highlight has-video">
+        <div class="modal-highlight-head">
+          <span>Goal highlights</span>
+          <strong>Highlight bàn thắng</strong>
+        </div>
+        <div class="modal-video-frame">
+          <video controls playsinline preload="metadata" src="${safeHtml(rawUrl)}"></video>
+        </div>
+      </section>`;
+  }
+
+  return `
+    <section class="modal-highlight is-empty">
+      <div class="modal-highlight-head">
+        <span>Goal highlights</span>
+        <strong>Không thể nhúng trực tiếp link này</strong>
+      </div>
+      <a class="modal-highlight-link" href="${safeHtml(rawUrl)}" target="_blank" rel="noopener noreferrer">Mở video highlight</a>
+    </section>`;
+}
+
 function matchDetailsHtml(match) {
   const safe = safeHtml;
   const winnerSide = getWinnerSide(match);
@@ -450,7 +558,8 @@ function matchDetailsHtml(match) {
     <div class="modal-teams">
       ${teamBlock('Home team', match.home || {})}
       ${teamBlock('Away team', match.away || {})}
-    </div>`;
+    </div>
+    ${highlightVideoHtml(match)}`;
 }
 
 function openMatchModal(match, index = null) {
@@ -484,6 +593,7 @@ function closeMatchModal() {
   setTimeout(() => {
     matchModal.classList.remove('is-open');
     matchModal.style.display = 'none';
+    if (modalCard) modalCard.innerHTML = '';
   }, 180);
   matchModal.setAttribute('aria-hidden', 'true');
   activeModalIndex = -1;

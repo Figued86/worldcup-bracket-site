@@ -194,6 +194,43 @@ function firstDefined(...values) {
   return values.find(value => value !== undefined && value !== null && value !== '' && value !== 'null');
 }
 
+
+function pickHighlightMedia(item = {}) {
+  const candidates = [
+    item.highlightUrl,
+    item.highlight_url,
+    item.highlightsUrl,
+    item.highlights_url,
+    item.highlight,
+    item.highlights,
+    item.videoUrl,
+    item.video_url,
+    item.video,
+    item.video_embed,
+    item.videoEmbed,
+    item.media?.highlightUrl,
+    item.media?.highlight_url,
+    item.media?.videoUrl,
+    item.media?.video_url,
+    item.links?.highlight,
+    item.links?.highlights,
+    item.links?.video,
+    item.url_highlight,
+    item.url_video
+  ];
+  for (const value of candidates) {
+    if (!value) continue;
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) {
+      const found = value.find(entry => entry && (typeof entry === 'string' || entry.url || entry.href || entry.embed || entry.embedUrl));
+      if (typeof found === 'string') return found;
+      if (found) return found.embedUrl || found.embed_url || found.embed || found.url || found.href || found.videoUrl || found.video_url || '';
+    }
+    if (typeof value === 'object') return value.embedUrl || value.embed_url || value.embed || value.url || value.href || value.videoUrl || value.video_url || '';
+  }
+  return '';
+}
+
 function asArray(payload) {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.data)) return payload.data;
@@ -674,6 +711,7 @@ function normalizeFreeWorldCupGame(item, index, teamMap = new Map(), stadiumMap 
     venue,
     status,
     statusText: finished ? 'Finished' : String(rawStatus),
+    highlightUrl: pickHighlightMedia(item),
     home: makeTeamPayload(item, 'home', {
       name: homeName,
       flag: firstDefined(item.home_team_flag, homeFromMap?.flag, pickTeamFlag(rawHomeTeam), ''),
@@ -708,6 +746,7 @@ function normalizeApiFootballFixture(item, events = []) {
     venue: fixture.venue?.name || '',
     status: fixture.status?.short || 'NS',
     statusText: fixture.status?.long || 'Not Started',
+    highlightUrl: pickHighlightMedia(item),
     home: makeTeamPayload(eventCarrier, 'home', {
       name: homeName,
       flag: teams.home?.logo || '',
