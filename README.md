@@ -128,3 +128,34 @@ Bản này đã sửa lại logic penalty:
 - Main bracket cards now show abbreviated country names only, maximum 5 first letters.
 - Goal scorers, goal minutes, yellow cards and red cards are hidden from the main bracket.
 - Full match details remain available inside the match pop-up.
+
+## Automatic YouTube/Vimeo highlight search
+
+Bản này hỗ trợ 2 lớp video highlight trong pop-up:
+
+1. Nếu API/dữ liệu trận có sẵn `highlightUrl`, `videoUrl`, `highlights`, v.v. thì frontend nhúng trực tiếp YouTube/Vimeo/embed/mp4 như trước.
+2. Nếu trận đã thi đấu nhưng chưa có link, backend có thể tự tìm highlight qua **YouTube Data API v3** bằng tên 2 đội + World Cup + năm thi đấu.
+
+Cấu hình trên Render Environment hoặc file `.env` local:
+
+```env
+YOUTUBE_API_KEY=your_youtube_api_key_here
+ENABLE_AUTO_HIGHLIGHT_SEARCH=true
+ALLOW_UNVERIFIED_VIDEO_SEARCH=false
+OFFICIAL_VIDEO_CHANNELS=FIFA,FOX Soccer,beIN SPORTS,TSN,Telemundo Deportes,BBC Sport,ITV Sport,SBS Sport
+YOUTUBE_SEARCH_CACHE_HOURS=6
+```
+
+Khuyến nghị giữ `ALLOW_UNVERIFIED_VIDEO_SEARCH=false` để chỉ nhúng video từ các kênh official/whitelist. Nếu không có key YouTube hoặc không tìm được kênh hợp lệ, popup sẽ giữ trạng thái `Chưa có link video highlight cho trận này`.
+
+## Troubleshooting highlight videos
+
+If the popup still shows no embedded video:
+
+1. Check `/api/health`. `autoHighlightSearch` must be `true` and `highlightVideoCount` should be greater than `0` after at least one played match has a valid result.
+2. Add a real YouTube Data API v3 key to Render Environment as `YOUTUBE_API_KEY`.
+3. Keep `ENABLE_AUTO_HIGHLIGHT_SEARCH=true`.
+4. By default, only whitelisted official channels are embedded. If you need broader search during testing, set `ALLOW_UNVERIFIED_VIDEO_SEARCH=true`, then switch it back to `false` for production safety.
+5. The demo/mock match data may not correspond to real highlight videos on YouTube. For guaranteed display, add `highlightUrl` directly to a match record.
+
+The frontend also shows a quick YouTube search link when no embeddable video is found.

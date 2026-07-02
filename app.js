@@ -124,7 +124,10 @@ function safeHtml(value) {
 
 function cleanSpacingArtifacts(value) {
   return String(value ?? '')
-    .replace(/\{\s*[\"']\s*[\"']\s*\}/g, ' ')
+    // Remove React/JSX spacing artifacts that sometimes leak from APIs or copied data.
+    // Covers: {" "}, {\" \"}, {' '}, {&quot; &quot;} and empty {}.
+    .replace(/\{\s*(?:\\?[\"']|&quot;)\s*(?:\\?[\"']|&quot;)\s*\}/g, ' ')
+    .replace(/(?:\\?[\"']|&quot;)\s*(?:\\?[\"']|&quot;)/g, ' ')
     .replace(/\{\s*\}/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -421,8 +424,20 @@ function normalizeVimeoEmbedUrl(url) {
   }
 }
 
+function makeHighlightSearchUrl(match = {}) {
+  const home = cleanDisplayValue(match.home?.name || '');
+  const away = cleanDisplayValue(match.away?.name || '');
+  const year = match.date ? new Date(match.date).getUTCFullYear() : '2026';
+  const query = [home, 'vs', away, 'highlights goals FIFA World Cup', year]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  return query ? 'https://www.youtube.com/results?search_query=' + encodeURIComponent(query) : 'https://www.youtube.com/results?search_query=FIFA+World+Cup+highlights';
+}
+
 function highlightVideoHtml(match = {}) {
   const rawUrl = extractHighlightSource(match);
+  const highlightSourceLabel = match.highlightSource || match.highlightProvider || 'Highlight bàn thắng';
   const played = isMatchPlayed(match);
   if (!played) {
     return `
@@ -434,12 +449,15 @@ function highlightVideoHtml(match = {}) {
       </section>`;
   }
   if (!rawUrl) {
+    const searchUrl = makeHighlightSearchUrl(match);
     return `
       <section class="modal-highlight is-empty">
         <div class="modal-highlight-head">
           <span>Goal highlights</span>
-          <strong>Chưa có link video highlight cho trận này</strong>
+          <strong>Chưa tìm được video highlight hợp lệ để nhúng</strong>
         </div>
+        <p class="modal-highlight-note">Cần thêm YOUTUBE_API_KEY trên Render, hoặc thêm thủ công highlightUrl cho trận này. Có thể mở nhanh kết quả tìm kiếm YouTube bên dưới.</p>
+        <a class="modal-highlight-link" href="${safeHtml(searchUrl)}" target="_blank" rel="noopener noreferrer">Tìm highlight trên YouTube</a>
       </section>`;
   }
 
@@ -453,7 +471,7 @@ function highlightVideoHtml(match = {}) {
       <section class="modal-highlight has-video">
         <div class="modal-highlight-head">
           <span>Goal highlights</span>
-          <strong>Highlight bàn thắng</strong>
+          <strong>${safeHtml(highlightSourceLabel)}</strong>
         </div>
         <div class="modal-video-frame">
           <iframe src="${safeHtml(embedUrl)}" title="Match goal highlights" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
@@ -466,7 +484,7 @@ function highlightVideoHtml(match = {}) {
       <section class="modal-highlight has-video">
         <div class="modal-highlight-head">
           <span>Goal highlights</span>
-          <strong>Highlight bàn thắng</strong>
+          <strong>${safeHtml(highlightSourceLabel)}</strong>
         </div>
         <div class="modal-video-frame">
           <video controls playsinline preload="metadata" src="${safeHtml(rawUrl)}"></video>

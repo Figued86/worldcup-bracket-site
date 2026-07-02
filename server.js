@@ -20,6 +20,20 @@ const FREE_API_URL = process.env.FREE_API_URL || 'https://worldcup26.ir/get/game
 const FREE_TEAMS_URL = process.env.FREE_TEAMS_URL || 'https://worldcup26.ir/get/teams';
 const FREE_STADIUMS_URL = process.env.FREE_STADIUMS_URL || 'https://worldcup26.ir/get/stadiums';
 
+// Optional automatic highlight lookup. Uses the official YouTube Data API on the server.
+// Keep the key in Render/GitHub secrets or .env only; never expose it in frontend JS.
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
+const ENABLE_AUTO_HIGHLIGHT_SEARCH = String(process.env.ENABLE_AUTO_HIGHLIGHT_SEARCH || 'true').toLowerCase() !== 'false';
+const ALLOW_UNVERIFIED_VIDEO_SEARCH = String(process.env.ALLOW_UNVERIFIED_VIDEO_SEARCH || 'false').toLowerCase() === 'true';
+const OFFICIAL_VIDEO_CHANNELS = String(
+  process.env.OFFICIAL_VIDEO_CHANNELS || 'FIFA,FOX Soccer,beIN SPORTS,TSN,Telemundo Deportes,BBC Sport,ITV Sport,SBS Sport'
+)
+  .split(',')
+  .map(value => value.trim().toLowerCase())
+  .filter(Boolean);
+const YOUTUBE_SEARCH_CACHE_MS = Number(process.env.YOUTUBE_SEARCH_CACHE_HOURS || 6) * 60 * 60 * 1000;
+const youtubeHighlightCache = new Map();
+
 
 
 const VERIFIED_KNOCKOUT_TIMES_BY_MATCH_NUMBER = {
@@ -231,6 +245,107 @@ function pickHighlightMedia(item = {}) {
   return '';
 }
 
+
+function serverHasScore(value) {
+  return value !== null && value !== undefined && value !== '' && value !== '-';
+}
+
+function isPlayedForHighlight(match = {}) {
+  const status = String(match.status || '').toUpperCase();
+  return Boolean(
+    match.winner ||
+    serverHasScore(match.home?.score) ||
+    serverHasScore(match.away?.score) ||
+    ['FT', 'AET', 'PEN', 'LIVE', 'HT', 'ET', '1H', '2H'].includes(status)
+  );
+}
+
+function hasUsableTeamNames(match = {}) {
+  const names = [match.home?.name, match.away?.name].map(value => String(value || '').trim().toLowerCase());
+  return names.every(name => name && name !== 'tbd' && name !== 'undefined' && name !== 'null');
+}
+
+function makeHighlightSearchQuery(match = {}) {
+  const home = match.home?.name || '';
+  const away = match.away?.name || '';
+  const year = match.date ? new Date(match.date).getUTCFullYear() : SEASON;
+  return `${home} vs ${away} highlights FIFA World Cup ${year} goals`;
+}
+
+function channelIsAllowed(channelTitle = '') {
+  const title = String(channelTitle || '').toLowerCase();
+  if (!OFFICIAL_VIDEO_CHANNELS.length) return true;
+  return OFFICIAL_VIDEO_CHANNELS.some(allowed => title === allowed || title.includes(allowed));
+}
+
+async function searchYouTubeHighlight(match = {}) {
+  if (!ENABLE_AUTO_HIGHLIGHT_SEARCH || !YOUTUBE_API_KEY || YOUTUBE_API_KEY === 'your_youtube_api_key_here') return null;
+  if (!isPlayedForHighlight(match) || !hasUsableTeamNames(match)) return null;
+
+  const cacheKey = [match.id, match.home?.name, match.away?.name, match.date].join('|').toLowerCase();
+  const cached = youtubeHighlightCache.get(cacheKey);
+  if (cached && Date.now() - cached.savedAt < YOUTUBE_SEARCH_CACHE_MS) return cached.value;
+
+  const query = makeHighlightSearchQuery(match);
+  const url = new URL('https://www.googleapis.com/youtube/v3/search');
+  url.searchParams.set('part', 'snippet');
+  url.searchParams.set('q', query);
+  url.searchParams.set('type', 'video');
+  url.searchParams.set('maxResults', '8');
+  url.searchParams.set('order', 'relevance');
+  url.searchParams.set('safeSearch', 'strict');
+  url.searchParams.set('videoEmbeddable', 'true');
+  url.searchParams.set('key', YOUTUBE_API_KEY);
+
+  try {
+    const json = await fetchJsonWithTimeout(url.toString(), {}, 8000);
+    const items = Array.isArray(json.items) ? json.items : [];
+    const allowed = items.find(item => item?.id?.videoId && channelIsAllowed(item.snippet?.channelTitle));
+    const fallback = ALLOW_UNVERIFIED_VIDEO_SEARCH ? items.find(item => item?.id?.videoId) : null;
+    const chosen = allowed || fallback || null;
+    const value = chosen ? {
+      url: `https://www.youtube.com/watch?v=${chosen.id.videoId}`,
+      provider: 'YouTube',
+      source: chosen.snippet?.channelTitle || 'YouTube',
+      query
+    } : null;
+    youtubeHighlightCache.set(cacheKey, { savedAt: Date.now(), value });
+    return value;
+  } catch (error) {
+    youtubeHighlightCache.set(cacheKey, { savedAt: Date.now(), value: null });
+    return null;
+  }
+}
+
+async function enrichMatchesWithHighlights(payload = {}) {
+  const matches = Array.isArray(payload.matches) ? payload.matches : [];
+  if (!matches.length || !ENABLE_AUTO_HIGHLIGHT_SEARCH || !YOUTUBE_API_KEY || YOUTUBE_API_KEY === 'your_youtube_api_key_here') return payload;
+
+  const enriched = await Promise.all(matches.map(async match => {
+    if (pickHighlightMedia(match)) return match;
+    const found = await searchYouTubeHighlight(match);
+    if (!found?.url) return match;
+    return {
+      ...match,
+      highlightUrl: found.url,
+      highlightProvider: found.provider,
+      highlightSource: found.source,
+      highlightQuery: found.query
+    };
+  }));
+
+  return {
+    ...payload,
+    videoSearch: {
+      enabled: true,
+      provider: 'youtube',
+      officialChannelFilter: OFFICIAL_VIDEO_CHANNELS,
+      allowUnverified: ALLOW_UNVERIFIED_VIDEO_SEARCH
+    },
+    matches: enriched
+  };
+}
+
 function asArray(payload) {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.data)) return payload.data;
@@ -314,10 +429,19 @@ function numberOrZero(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
+function cleanTextArtifacts(value) {
+  return String(value ?? '')
+    .replace(/\{\s*(?:\\?[\"']|&quot;)\s*(?:\\?[\"']|&quot;)\s*\}/g, ' ')
+    .replace(/(?:\\?[\"']|&quot;)\s*(?:\\?[\"']|&quot;)/g, ' ')
+    .replace(/\{\s*\}/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function cleanPlayerName(value) {
   if (!value) return '';
-  if (typeof value === 'string') return value.trim();
-  return firstDefined(
+  if (typeof value === 'string') return cleanTextArtifacts(value);
+  return cleanTextArtifacts(firstDefined(
     value.name,
     value.player_name,
     value.playerName,
@@ -327,13 +451,13 @@ function cleanPlayerName(value) {
     value.firstname && value.lastname ? `${value.firstname} ${value.lastname}` : null,
     value.first_name && value.last_name ? `${value.first_name} ${value.last_name}` : null,
     ''
-  );
+  ));
 }
 
 function cleanPlayerNumber(value) {
   if (!value) return '';
-  if (typeof value === 'number' || typeof value === 'string') return String(value).trim();
-  return firstDefined(
+  if (typeof value === 'number' || typeof value === 'string') return cleanTextArtifacts(value);
+  return cleanTextArtifacts(firstDefined(
     value.number,
     value.shirt_number,
     value.shirtNumber,
@@ -344,7 +468,7 @@ function cleanPlayerNumber(value) {
     value.player_number,
     value.playerNumber,
     ''
-  );
+  ));
 }
 
 function normalizeScorer(raw, fallbackTeamSide = '') {
@@ -354,8 +478,8 @@ function normalizeScorer(raw, fallbackTeamSide = '') {
   if (!name) return null;
   return {
     teamSide: firstDefined(raw.teamSide, raw.side, raw.team_side, fallbackTeamSide, ''),
-    name,
-    number: firstDefined(
+    name: cleanTextArtifacts(name),
+    number: cleanTextArtifacts(firstDefined(
       cleanPlayerNumber(player),
       raw.number,
       raw.shirt_number,
@@ -363,8 +487,8 @@ function normalizeScorer(raw, fallbackTeamSide = '') {
       raw.jersey_number,
       raw.player_number,
       ''
-    ),
-    minute: firstDefined(raw.minute, raw.time, raw.elapsed, raw.match_minute, '')
+    )),
+    minute: cleanTextArtifacts(firstDefined(raw.minute, raw.time, raw.elapsed, raw.match_minute, ''))
   };
 }
 
@@ -872,14 +996,14 @@ async function getMatches() {
   if (cachedPayload && now - cachedAt < CACHE_SECONDS * 1000) return cachedPayload;
 
   try {
-    cachedPayload = await fetchByMode();
+    cachedPayload = await enrichMatchesWithHighlights(await fetchByMode());
   } catch (error) {
     const fallback = await fetchMockData();
-    cachedPayload = {
+    cachedPayload = await enrichMatchesWithHighlights({
       ...fallback,
       source: 'mock-fallback',
       error: error.message
-    };
+    });
   }
   cachedAt = now;
   return cachedPayload;
@@ -896,6 +1020,8 @@ app.get('/api/health', async (_req, res) => {
     mode: DATA_MODE,
     source: payload.source,
     matchCount: payload.matches?.length || 0,
+    autoHighlightSearch: Boolean(ENABLE_AUTO_HIGHLIGHT_SEARCH && YOUTUBE_API_KEY && YOUTUBE_API_KEY !== 'your_youtube_api_key_here'),
+    highlightVideoCount: (payload.matches || []).filter(match => pickHighlightMedia(match)).length,
     error: payload.error || null,
     updatedAt: payload.updatedAt
   });

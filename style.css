@@ -877,6 +877,14 @@ body::after {
   margin-bottom: 0;
 }
 
+.modal-highlight-note {
+  margin: 10px auto 0;
+  max-width: 520px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .modal-highlight-link {
   display: inline-flex;
   align-items: center;
