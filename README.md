@@ -109,3 +109,15 @@ Bản này đã sửa lại logic penalty:
 
 - Site tone updated to a deeper black-gold World Cup look.
 - Match cards, modal, mobile navigation, refresh indicator, winner highlight, and upcoming-match dimming are aligned with the new dark stadium background.
+
+## Cập nhật compact score layout
+
+- Card trận đấu được rút gọn theo kiểu scoreboard premium.
+- Quốc kỳ đội bóng hiển thị dạng icon tròn lớn.
+- Tỷ số từng đội được phóng lớn để đọc nhanh.
+- Trận đã đá hiển thị rõ nhất.
+- Trận chưa đá tự làm mờ theo khoảng cách ngày so với hôm nay theo timezone Việt Nam:
+  - Hôm nay: mờ nhẹ.
+  - Ngày kế tiếp: mờ hơn.
+  - Xa hơn: chìm sâu vào nền.
+- Logic này tự cập nhật theo ngày, không cần sửa thủ công.
