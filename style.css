@@ -1585,3 +1585,58 @@ body::after {
     font-size: 12px;
   }
 }
+
+/* Thin previous / next match navigation in premium popup */
+.modal-match-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: 30px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(224, 186, 82, 0.32);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.045);
+  color: rgba(255, 239, 190, 0.86);
+  font-size: 30px;
+  font-weight: 200;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, opacity 160ms ease;
+}
+
+.modal-match-nav-prev { left: 14px; }
+.modal-match-nav-next { right: 14px; }
+
+.modal-match-nav:hover,
+.modal-match-nav:focus-visible {
+  background: rgba(224, 186, 82, 0.13);
+  border-color: rgba(224, 186, 82, 0.62);
+  color: #fff1bf;
+  outline: none;
+}
+
+.modal-match-nav-prev:hover,
+.modal-match-nav-prev:focus-visible { transform: translateY(-50%) translateX(-2px); }
+.modal-match-nav-next:hover,
+.modal-match-nav-next:focus-visible { transform: translateY(-50%) translateX(2px); }
+
+.modal-match-nav:disabled {
+  opacity: 0.18;
+  cursor: default;
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  .modal-match-nav {
+    width: 26px;
+    height: 50px;
+    font-size: 26px;
+  }
+
+  .modal-match-nav-prev { left: 8px; }
+  .modal-match-nav-next { right: 8px; }
+}

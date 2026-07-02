@@ -28,6 +28,9 @@ const modalClose = document.getElementById('modalClose');
 const refreshStatus = document.getElementById('refreshStatus');
 const mobileRoundNav = document.getElementById('mobileRoundNav');
 
+let modalMatchList = [];
+let activeModalIndex = -1;
+
 const DISPLAY_TIMEZONE = 'Asia/Ho_Chi_Minh';
 const DISPLAY_TIMEZONE_LABEL = 'UTC+7';
 
@@ -119,12 +122,20 @@ function safeHtml(value) {
   }[char]));
 }
 
+function cleanSpacingArtifacts(value) {
+  return String(value ?? '')
+    .replace(/\{\s*[\"']\s*[\"']\s*\}/g, ' ')
+    .replace(/\{\s*\}/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function cleanDisplayValue(value, fallback = '') {
   const parsed = parseMaybeJson(value);
   if (parsed && typeof parsed === 'object') {
-    return parsed.name || parsed.player_name || parsed.playerName || parsed.full_name || parsed.display_name || fallback;
+    return cleanSpacingArtifacts(parsed.name || parsed.player_name || parsed.playerName || parsed.full_name || parsed.display_name || fallback);
   }
-  return String(parsed || fallback).trim();
+  return cleanSpacingArtifacts(parsed || fallback);
 }
 
 const FIFA_TEAM_CODES = {
@@ -241,9 +252,9 @@ function getWinnerSide(match) {
 function scorerHtml(scorer) {
   const parsed = parseMaybeJson(scorer);
   const name = cleanDisplayValue(parsed?.name || parsed?.player || parsed?.scorer || parsed, 'Unknown');
-  const numberValue = parsed?.number || parsed?.shirt_number || parsed?.shirtNumber || parsed?.jersey_number || parsed?.jerseyNumber || '';
+  const numberValue = cleanSpacingArtifacts(parsed?.number || parsed?.shirt_number || parsed?.shirtNumber || parsed?.jersey_number || parsed?.jerseyNumber || '');
   const number = numberValue ? ` - ${safeHtml(numberValue)}` : '';
-  const minuteValue = parsed?.minute || parsed?.time || parsed?.elapsed || '';
+  const minuteValue = cleanSpacingArtifacts(parsed?.minute || parsed?.time || parsed?.elapsed || '');
   const minute = minuteValue ? ` (${safeHtml(minuteValue)}')` : '';
   return `<strong>${safeHtml(name)}</strong>${number}${minute}`;
 }
@@ -263,9 +274,9 @@ function compactDetailHtml(team = {}) {
 function scorerText(scorer) {
   const parsed = parseMaybeJson(scorer);
   const name = cleanDisplayValue(parsed?.name || parsed?.player || parsed?.scorer || parsed, 'Unknown');
-  const numberValue = parsed?.number || parsed?.shirt_number || parsed?.shirtNumber || parsed?.jersey_number || parsed?.jerseyNumber || '';
+  const numberValue = cleanSpacingArtifacts(parsed?.number || parsed?.shirt_number || parsed?.shirtNumber || parsed?.jersey_number || parsed?.jerseyNumber || '');
   const number = numberValue ? ` - ${numberValue}` : '';
-  const minuteValue = parsed?.minute || parsed?.time || parsed?.elapsed || '';
+  const minuteValue = cleanSpacingArtifacts(parsed?.minute || parsed?.time || parsed?.elapsed || '');
   const minute = minuteValue ? ` (${minuteValue}')` : '';
   return `${name}${number}${minute}`;
 }
@@ -333,6 +344,38 @@ function upcomingProximityClass(match) {
   return 'is-upcoming-later';
 }
 
+
+function matchSortTimestamp(match) {
+  const date = parseMatchDate(match?.date);
+  return date ? date.getTime() : Number.POSITIVE_INFINITY;
+}
+
+function matchSortTieBreaker(match) {
+  const round = normalizeRound(match?.round);
+  const roundIndex = ROUND_ORDER.indexOf(round);
+  const matchNumber = Number(match?.matchNumber || match?.match_number || match?.id || 0);
+  return `${roundIndex < 0 ? 99 : roundIndex}-${String(matchNumber).padStart(4, '0')}-${match?.home?.name || ''}-${match?.away?.name || ''}`;
+}
+
+function buildModalMatchList(grouped) {
+  return ROUND_ORDER
+    .flatMap(round => grouped[round] || [])
+    .slice()
+    .sort((a, b) => {
+      const diff = matchSortTimestamp(a) - matchSortTimestamp(b);
+      if (diff !== 0) return diff;
+      return matchSortTieBreaker(a).localeCompare(matchSortTieBreaker(b));
+    });
+}
+
+function modalNavHtml() {
+  const hasPrev = activeModalIndex > 0;
+  const hasNext = activeModalIndex >= 0 && activeModalIndex < modalMatchList.length - 1;
+  return `
+    <button class="modal-match-nav modal-match-nav-prev" type="button" data-modal-nav="prev" aria-label="Xem trận trước" ${hasPrev ? '' : 'disabled'}>‹</button>
+    <button class="modal-match-nav modal-match-nav-next" type="button" data-modal-nav="next" aria-label="Xem trận tiếp theo" ${hasNext ? '' : 'disabled'}>›</button>`;
+}
+
 function matchDetailsHtml(match) {
   const safe = safeHtml;
   const winnerSide = getWinnerSide(match);
@@ -379,6 +422,7 @@ function matchDetailsHtml(match) {
   };
 
   return `
+    ${modalNavHtml()}
     <div class="modal-title">
       <span>${safe(normalizeRound(match.round))}</span>
       <h2>${safe(match.home?.name || 'TBD')} vs ${safe(match.away?.name || 'TBD')}</h2>
@@ -409,8 +453,10 @@ function matchDetailsHtml(match) {
     </div>`;
 }
 
-function openMatchModal(match) {
+function openMatchModal(match, index = null) {
   if (!matchModal || !modalCard) return;
+  const resolvedIndex = index ?? modalMatchList.indexOf(match);
+  activeModalIndex = resolvedIndex >= 0 ? resolvedIndex : modalMatchList.indexOf(match);
   modalCard.innerHTML = matchDetailsHtml(match);
   matchModal.style.display = 'flex';
   requestAnimationFrame(() => {
@@ -418,6 +464,18 @@ function openMatchModal(match) {
     requestAnimationFrame(() => matchModal.classList.add('is-visible'));
   });
   matchModal.setAttribute('aria-hidden', 'false');
+}
+
+function showModalAtIndex(index) {
+  if (index < 0 || index >= modalMatchList.length) return;
+  activeModalIndex = index;
+  if (modalCard) modalCard.innerHTML = matchDetailsHtml(modalMatchList[index]);
+}
+
+function navigateModal(direction) {
+  if (activeModalIndex < 0) return;
+  const nextIndex = activeModalIndex + direction;
+  showModalAtIndex(nextIndex);
 }
 
 function closeMatchModal() {
@@ -428,6 +486,7 @@ function closeMatchModal() {
     matchModal.style.display = 'none';
   }, 180);
   matchModal.setAttribute('aria-hidden', 'true');
+  activeModalIndex = -1;
 }
 
 function sortMatches(matches = []) {
@@ -673,6 +732,7 @@ function makeColumn(round, matches) {
 
 function render(payload) {
   const grouped = buildBracket(payload.matches || []);
+  modalMatchList = buildModalMatchList(grouped);
   if (linearBracket) {
     linearBracket.innerHTML = '';
     for (const round of ROUND_ORDER) {
@@ -724,6 +784,12 @@ async function loadMatches() {
     document.body.classList.remove('is-refreshing');
   }
 }
+
+modalCard?.addEventListener('click', event => {
+  const button = event.target.closest('[data-modal-nav]');
+  if (!button || button.disabled) return;
+  navigateModal(button.dataset.modalNav === 'next' ? 1 : -1);
+});
 
 modalClose?.addEventListener('click', closeMatchModal);
 matchModal?.addEventListener('click', event => {
