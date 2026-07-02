@@ -432,10 +432,33 @@ function closeMatchModal() {
 
 function sortMatches(matches = []) {
   return [...matches].sort((a, b) => {
-    const aDate = parseMatchDate(a.date)?.getTime() || 0;
-    const bDate = parseMatchDate(b.date)?.getTime() || 0;
+    const aDate = parseMatchDate(a.date)?.getTime() || Number.MAX_SAFE_INTEGER;
+    const bDate = parseMatchDate(b.date)?.getTime() || Number.MAX_SAFE_INTEGER;
     const aId = Number(a.id) || 0;
     const bId = Number(b.id) || 0;
+    return aDate - bDate || aId - bId;
+  });
+}
+
+function sortMatchesForDisplay(matches = []) {
+  return [...matches].sort((a, b) => {
+    const aHasDate = Boolean(parseMatchDate(a.date));
+    const bHasDate = Boolean(parseMatchDate(b.date));
+    if (aHasDate !== bHasDate) return aHasDate ? -1 : 1;
+
+    const aPlayed = isMatchPlayed(a);
+    const bPlayed = isMatchPlayed(b);
+    if (aPlayed !== bPlayed) return aPlayed ? -1 : 1;
+
+    const aDate = parseMatchDate(a.date)?.getTime() || Number.MAX_SAFE_INTEGER;
+    const bDate = parseMatchDate(b.date)?.getTime() || Number.MAX_SAFE_INTEGER;
+    const aId = Number(a.id) || 0;
+    const bId = Number(b.id) || 0;
+
+    if (aPlayed && bPlayed) {
+      return bDate - aDate || bId - aId;
+    }
+
     return aDate - bDate || aId - bId;
   });
 }
@@ -542,6 +565,10 @@ function buildBracket(matches = []) {
   maybeHydrateFutureRound(built['Quarter-finals'], built['Round of 16']);
   maybeHydrateFutureRound(built['Semi-finals'], built['Quarter-finals']);
   maybeHydrateFutureRound(built['Final'], built['Semi-finals']);
+
+  for (const round of ROUND_ORDER) {
+    built[round] = sortMatchesForDisplay(built[round]);
+  }
 
   return built;
 }
