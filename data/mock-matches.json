@@ -12,13 +12,18 @@
       "home": {
         "name": "Germany",
         "flag": "https://flagcdn.com/w80/de.png",
-        "score": 1,
-        "penalties": 3,
+        "score": 2,
+        "penalties": null,
         "scorers": [
           {
-            "name": "Kai Havertz",
-            "number": "",
-            "minute": "54"
+            "name": "Michael Owen",
+            "number": "10",
+            "minute": "23"
+          },
+          {
+            "name": "Demo Striker",
+            "number": "9",
+            "minute": "67"
           }
         ],
         "cards": {
@@ -30,12 +35,12 @@
         "name": "Paraguay",
         "flag": "https://flagcdn.com/w80/py.png",
         "score": 1,
-        "penalties": 4,
+        "penalties": null,
         "scorers": [
           {
-            "name": "Julio Enciso",
-            "number": "",
-            "minute": "42"
+            "name": "Demo Midfielder",
+            "number": "8",
+            "minute": "51"
           }
         ],
         "cards": {
@@ -79,12 +84,12 @@
       "round": "Round of 32",
       "date": "2026-06-29T22:00:00Z",
       "venue": "TBC",
-      "status": "FT",
-      "statusText": "Finished",
+      "status": "NS",
+      "statusText": "Not Started",
       "home": {
         "name": "South Africa",
         "flag": "https://flagcdn.com/w80/za.png",
-        "score": 0,
+        "score": null,
         "penalties": null,
         "scorers": [],
         "cards": {
@@ -95,15 +100,9 @@
       "away": {
         "name": "Canada",
         "flag": "https://flagcdn.com/w80/ca.png",
-        "score": 1,
+        "score": null,
         "penalties": null,
-        "scorers": [
-          {
-            "name": "Stephen Eustáquio",
-            "number": "7",
-            "minute": "90+2"
-          }
-        ],
+        "scorers": [],
         "cards": {
           "yellow": 0,
           "red": 0
@@ -265,25 +264,14 @@
       "round": "Round of 32",
       "date": "2026-07-02T22:00:00Z",
       "venue": "TBC",
-      "status": "FT",
-      "statusText": "Finished",
+      "status": "NS",
+      "statusText": "Not Started",
       "home": {
         "name": "Brazil",
         "flag": "https://flagcdn.com/w80/br.png",
-        "score": 2,
+        "score": null,
         "penalties": null,
-        "scorers": [
-          {
-            "name": "Casemiro",
-            "number": "",
-            "minute": ""
-          },
-          {
-            "name": "Gabriel Martinelli",
-            "number": "",
-            "minute": "90+"
-          }
-        ],
+        "scorers": [],
         "cards": {
           "yellow": 0,
           "red": 0
@@ -292,15 +280,9 @@
       "away": {
         "name": "Japan",
         "flag": "https://flagcdn.com/w80/jp.png",
-        "score": 1,
+        "score": null,
         "penalties": null,
-        "scorers": [
-          {
-            "name": "Kaishu Sano",
-            "number": "",
-            "minute": "29"
-          }
-        ],
+        "scorers": [],
         "cards": {
           "yellow": 0,
           "red": 0
