@@ -364,8 +364,20 @@ function matchDetailsHtml(match) {
       <h2>${safe(match.home?.name || 'TBD')} vs ${safe(match.away?.name || 'TBD')}</h2>
       <strong>${safe(match.status || 'TBC')}</strong>
     </div>
-    <div class="modal-scoreline">${safe(scoreText(match.home))} : ${safe(scoreText(match.away))}</div>
-    <div class="modal-meta">${safe(formatDate(match.date))}${match.venue ? ` · ${safe(match.venue)}` : ''}</div>
+    <div class="modal-hero-score">
+      <div class="modal-side modal-side-home">
+        <img class="modal-side-flag" src="${safe(match.home?.flag || placeholderFlag(match.home?.name))}" alt="" />
+        <div class="modal-side-name">${safe(match.home?.name || 'TBD')}</div>
+      </div>
+      <div class="modal-score-core">
+        <div class="modal-scoreline">${safe(scoreText(match.home))} <span>:</span> ${safe(scoreText(match.away))}</div>
+        <div class="modal-meta">${safe(formatDate(match.date))}${match.venue ? ` · ${safe(match.venue)}` : ''}</div>
+      </div>
+      <div class="modal-side modal-side-away">
+        <img class="modal-side-flag" src="${safe(match.away?.flag || placeholderFlag(match.away?.name))}" alt="" />
+        <div class="modal-side-name">${safe(match.away?.name || 'TBD')}</div>
+      </div>
+    </div>
     ${penaltyHtml}
     <div class="modal-teams">
       ${teamBlock('Home team', match.home || {})}
