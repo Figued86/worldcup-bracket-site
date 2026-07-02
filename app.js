@@ -326,14 +326,25 @@ function upcomingProximityClass(match) {
 
 function matchDetailsHtml(match) {
   const safe = safeHtml;
+  const winnerSide = getWinnerSide(match);
   const penaltyHtml = hasPenaltyShootout(match) ? `
     <div class="modal-penalty has-data">
-      <span>Penalty shoot-out</span>
-      <strong>${safe(match.home?.penalties ?? 0)} - ${safe(match.away?.penalties ?? 0)}</strong>
+      <span class="modal-penalty-label">Penalty shoot-out</span>
+      <div class="modal-penalty-core">
+        <div class="modal-penalty-side ${winnerSide === 'home' ? 'is-winner' : ''}">
+          <em>${safe(match.home?.name || 'Home')}</em>
+          <strong>${safe(match.home?.penalties ?? 0)}</strong>
+        </div>
+        <div class="modal-penalty-divider">:</div>
+        <div class="modal-penalty-side ${winnerSide === 'away' ? 'is-winner' : ''}">
+          <strong>${safe(match.away?.penalties ?? 0)}</strong>
+          <em>${safe(match.away?.name || 'Away')}</em>
+        </div>
+      </div>
       <p>${safe(match.home?.name || 'Home')} ${safe(match.home?.penalties ?? 0)} - ${safe(match.away?.penalties ?? 0)} ${safe(match.away?.name || 'Away')}</p>
     </div>` : `
     <div class="modal-penalty no-data">
-      <span>Penalty shoot-out</span>
+      <span class="modal-penalty-label">Penalty shoot-out</span>
       <strong>No penalty data</strong>
       <p>Trận này chưa có loạt sút luân lưu hoặc chưa có dữ liệu penalty.</p>
     </div>`;
@@ -370,7 +381,11 @@ function matchDetailsHtml(match) {
         <div class="modal-side-name">${safe(match.home?.name || 'TBD')}</div>
       </div>
       <div class="modal-score-core">
-        <div class="modal-scoreline">${safe(scoreText(match.home))} <span>:</span> ${safe(scoreText(match.away))}</div>
+        <div class="modal-scoreline">
+          <span class="modal-score-part ${winnerSide === 'home' ? 'is-winner' : ''}">${safe(scoreText(match.home))}</span>
+          <span class="modal-score-divider">:</span>
+          <span class="modal-score-part ${winnerSide === 'away' ? 'is-winner' : ''}">${safe(scoreText(match.away))}</span>
+        </div>
         <div class="modal-meta">${safe(formatDate(match.date))}${match.venue ? ` · ${safe(match.venue)}` : ''}</div>
       </div>
       <div class="modal-side modal-side-away">
